@@ -67,7 +67,13 @@ class StateMachine
         }
     }
 
-    public function handleMessage(Telegram $msg) {
+    /**
+     * @param Telegram $msg
+     *
+     * @return bool
+     */
+    public function handleMessage(Telegram $msg)
+    {
         //first see if the current state is valid and that it can handle
         //the message
         if ($this->currentState != null && $this->currentState->onMessage($this->owner, $msg)) {
@@ -84,7 +90,8 @@ class StateMachine
     }
 
     //change to a new state
-    public function changeState(State $pNewState) {
+    public function changeState(State $pNewState)
+    {
         //keep a record of the previous state
         $this->previousState = $this->currentState;
 
@@ -99,30 +106,36 @@ class StateMachine
     }
 
     //change state back to the previous state
-    public function revertToPreviousState() {
+    public function revertToPreviousState()
+    {
         $this->changeState($this->previousState);
     }
 
     //returns true if the current state's type is equal to the type of the
     //class passed as a parameter. 
-    public function isInState(State $st) {
+    public function isInState(State $st)
+    {
         return get_class($this->currentState) == get_class($st);
     }
 
-    public function getCurrentState() {
+    public function getCurrentState()
+    {
         return $this->currentState;
     }
 
-    public function getGlobalState() {
+    public function getGlobalState()
+    {
         return $this->globalState;
     }
 
-    public function getPreviousState() {
+    public function getPreviousState()
+    {
         return $this->previousState;
     }
     //only ever used during debugging to grab the name of the current state
 
-    public function getNameOfCurrentState() {
+    public function getNameOfCurrentState()
+    {
         $s = explode('\\', get_class($this->currentState));
         if(count($s) > 0) {
             return $s[count($s) - 1];

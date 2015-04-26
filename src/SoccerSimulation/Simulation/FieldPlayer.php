@@ -32,9 +32,8 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
      * @param Vector2D $velocity
      * @param float $mass
      * @param float $maxForce
-     * @param float $maxSpeed
-     * @param float $maxTurnRate
-     * @param float $scale
+     * @param float $maxSpeedWithBall
+     * @param float $maxSpeedWithoutBall
      * @param string $role
      */
     public function __construct(SoccerTeam $homeTeam,
@@ -44,9 +43,8 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
             Vector2D $velocity,
             $mass,
             $maxForce,
-            $maxSpeed,
-            $maxTurnRate,
-            $scale,
+            $maxSpeedWithBall,
+            $maxSpeedWithoutBall,
             $role) {
         parent::__construct($homeTeam,
                 $homeRegion,
@@ -54,9 +52,8 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
                 $velocity,
                 $mass,
                 $maxForce,
-                $maxSpeed,
-                $maxTurnRate,
-                $scale,
+                $maxSpeedWithBall,
+                $maxSpeedWithoutBall,
                 $role);
 
         //set up the state machine
@@ -80,7 +77,8 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
     /**
      * call this to update the player's position and orientation
      */
-    public function update() {
+    public function update()
+    {
         parent::update();
 
         //run the logic for the current state
@@ -121,23 +119,30 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
         $this->velocity->add($accel);
 
         //make sure player does not exceed maximum velocity
-        $this->velocity->truncate($this->maxSpeed);
+        $this->velocity->truncate($this->getMaxSpeed());
         //update the position
         $this->position->add($this->velocity);
     }
 
     /**
      * routes any messages appropriately
+     *
+     * @param Telegram $message
+     *
+     * @return bool
      */
-    public function handleMessage(Telegram $message) {
+    public function handleMessage(Telegram $message)
+    {
         return $this->stateMachine->handleMessage($message);
     }
 
-    public function getStateMachine() {
+    public function getStateMachine()
+    {
         return $this->stateMachine;
     }
 
-    public function isReadyForNextKick() {
+    public function isReadyForNextKick()
+    {
         return $this->kickLimiter->isReady();
     }
 }

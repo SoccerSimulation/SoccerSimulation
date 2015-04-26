@@ -40,14 +40,8 @@ class GlobalPlayerState extends State
     /**
      * @param FieldPlayer $player
      */
-    public function execute($player) {
-        //if a player is in possession and close to the ball reduce his max speed
-        if (($player->isBallWithinReceivingRange()) && ($player->isControllingPlayer())) {
-            $player->setMaxSpeed(Prm::PlayerMaxSpeedWithBall);
-        } else {
-            $player->setMaxSpeed(Prm::PlayerMaxSpeedWithoutBall);
-        }
-
+    public function execute($player)
+    {
     }
 
     /**

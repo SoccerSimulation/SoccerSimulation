@@ -5,7 +5,7 @@ namespace SoccerSimulation\Simulation;
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Simulation\FieldPlayerStates\Wait;
 
-class FieldPlayerFactory
+class FieldPlayerFactory extends PlayerBaseFactory
 {
     /**
      * @param SoccerTeam $team
@@ -22,11 +22,11 @@ class FieldPlayerFactory
             Wait::getInstance(),
             new Vector2D(0, -1),
             new Vector2D(0, 0),
-            Prm::PlayerMass,
-            Prm::PlayerMaxForce,
-            Prm::PlayerMaxSpeedWithoutBall,
-            Prm::PlayerMaxTurnRate,
-            Prm::PlayerScale,
-            $role);
+            $this->getMass(),
+            $this->getMaxForce(),
+            $this->getMaxSpeedWithBall(),
+            $this->getMaxSpeedWithoutBall(),
+            $role
+        );
     }
 }

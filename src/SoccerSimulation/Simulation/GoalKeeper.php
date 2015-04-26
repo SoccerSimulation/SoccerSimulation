@@ -6,7 +6,6 @@ use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\FSM\StateMachine;
 use SoccerSimulation\Common\Messaging\Telegram;
-use Cunningsoft\MatchBundle\SimpleSoccer\Render\Player;
 use SoccerSimulation\Simulation\GoalKeeperStates\GlobalKeeperState;
 
 /**
@@ -30,18 +29,16 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
             Vector2D $velocity,
             $mass,
             $maxForce,
-            $maxSpeed,
-            $maxTurnRate,
-            $scale) {
+            $maxSpeedWithBall,
+            $maxSpeedWithoutBall) {
         parent::__construct($homeTeam,
                 $homeRegion,
                 $heading,
                 $velocity,
                 $mass,
                 $maxForce,
-                $maxSpeed,
-                $maxTurnRate,
-                $scale,
+                $maxSpeedWithBall,
+                $maxSpeedWithoutBall,
                 PlayerBase::PLAYER_ROLE_GOALKEEPER);
 
         $this->lookAt = new Vector2D();
@@ -72,7 +69,7 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
         $this->velocity->add($Acceleration);
 
         //make sure player does not exceed maximum velocity
-        $this->velocity->truncate($this->maxSpeed);
+        $this->velocity->truncate($this->getMaxSpeed());
 
         //update the position
         $this->position->add($this->velocity);

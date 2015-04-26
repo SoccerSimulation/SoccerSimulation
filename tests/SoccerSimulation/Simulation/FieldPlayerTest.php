@@ -13,11 +13,15 @@ class FieldPlayerTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $factory = new FieldPlayerFactory();
+        $factory = $this->getMockBuilder('SoccerSimulation\Simulation\FieldPlayerFactory')->setMethods(['getMaxSpeedWithBall', 'getMaxSpeedWithoutBall'])->getMock();
+        $factory->method('getMaxSpeedWithBall')->willReturn(Prm::PlayerMaxSpeedWithBallMin);
+        $factory->method('getMaxSpeedWithoutBall')->willReturn(Prm::PlayerMaxSpeedWithoutBallMin);
 
         $pitch = new SoccerPitch();
 
         $team = new SoccerTeam($pitch->getBlueGoal(), $pitch->getRedGoal(), $pitch, 'Blue');
+        $opponent = new SoccerTeam($pitch->getRedGoal(), $pitch->getBlueGoal(), $pitch, 'Red');
+        $team->SetOpponent($opponent);
 
         $this->fieldPlayer = $factory->create($team, 0, PlayerBase::PLAYER_ROLE_ATTACKER);
     }
@@ -30,27 +34,12 @@ class FieldPlayerTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->fieldPlayer->isInHotRegion());
     }
 
-    public function testIsInPenaltyArea()
+    public function testMaxSpeed()
     {
-        $this->assertFalse($this->fieldPlayer->isInPenaltyArea());
+        $this->assertEquals(Prm::PlayerMaxSpeedWithoutBallMin, $this->fieldPlayer->getMaxSpeed());
 
-        $this->fieldPlayer->placeAtPosition(new Vector2D(10, 400));
-        $this->assertTrue($this->fieldPlayer->isInPenaltyArea());
-    }
-
-    public function testIsInOwnPenaltyArea()
-    {
-        $this->assertFalse($this->fieldPlayer->isInOwnPenaltyArea());
-
-        $this->fieldPlayer->placeAtPosition(new Vector2D(10, 400));
-        $this->assertTrue($this->fieldPlayer->isInOwnPenaltyArea());
-    }
-
-    public function testIsInOpponentsPenaltyArea()
-    {
-        $this->assertFalse($this->fieldPlayer->isInOpponentsPenaltyArea());
-
-        $this->fieldPlayer->placeAtPosition(new Vector2D(10, 400));
-        $this->assertTrue($this->fieldPlayer->isInOpponentsPenaltyArea());
+        $this->fieldPlayer->getBall()->placeAtPosition($this->fieldPlayer->getPosition());
+        $this->fieldPlayer->getTeam()->setControllingPlayer($this->fieldPlayer);
+        $this->assertEquals(Prm::PlayerMaxSpeedWithBallMin, $this->fieldPlayer->getMaxSpeed());
     }
 }

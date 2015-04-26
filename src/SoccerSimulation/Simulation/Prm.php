@@ -27,7 +27,7 @@ class Prm
     //steering behavior, rather than Pursuit
     const ChanceOfUsingArriveTypeReceiveBehavior  = 0.5;
 
-    const BallSize                        = 5.0;
+    const BallSize                        = 2.2;
     const BallMass                        = 1.0;
     const Friction                        = -0.015;
 
@@ -38,10 +38,14 @@ class Prm
     //the number of times a player can kick the ball per second
     const PlayerKickFrequency               = 0;
 
-    const PlayerMass                      = 3.0;
-    const PlayerMaxForce                  = 1.0;
-    const PlayerMaxSpeedWithBall          = 1.2;
-    const PlayerMaxSpeedWithoutBall       = 1.6;
+    const PlayerMassMin                   = 0.5;
+    const PlayerMassMax                   = 5.5;
+    const PlayerMaxForceMin               = 0.5;
+    const PlayerMaxForceMax               = 1.5;
+    const PlayerMaxSpeedWithBallMin       = 1.0;
+    const PlayerMaxSpeedWithBallMax       = 1.4;
+    const PlayerMaxSpeedWithoutBallMin    = 1.4;
+    const PlayerMaxSpeedWithoutBallMax    = 1.8;
     const PlayerMaxTurnRate               = 0.4;
     const PlayerScale                     = 1.0;
 

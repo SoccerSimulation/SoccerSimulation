@@ -48,11 +48,9 @@ class SoccerBall extends MovingEntity implements \JsonSerializable
         parent::__construct($pos,
                 $ballSize,
                 new Vector2D(0, 0),
-                -1.0, //max speed - unused
                 new Vector2D(0, 1),
                 $mass,
                 new Vector2D(1.0, 1.0), //scale     - unused
-                0, //turn rate - unused
                 0);                  //max force - unused
 
         $this->friction = $friction;

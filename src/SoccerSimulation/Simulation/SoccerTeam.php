@@ -7,6 +7,7 @@ use SoccerSimulation\Common\D2\Transformation;
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\FSM\StateMachine;
 use SoccerSimulation\Common\Game\EntityManager;
+use SoccerSimulation\Common\Game\Region;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
 use SoccerSimulation\Simulation\FieldPlayerStates\ReturnToHomeRegion;
 use SoccerSimulation\Simulation\FieldPlayerStates\Wait;
@@ -692,8 +693,6 @@ class SoccerTeam implements \JsonSerializable
     public function setControllingPlayer(PlayerBase $player)
     {
         $this->controllingPlayer = $player;
-
-        //rub it in the opponents faces!
         $this->getOpponent()->setLostControl();
     }
 

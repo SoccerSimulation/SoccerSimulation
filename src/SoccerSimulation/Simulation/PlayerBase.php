@@ -2,6 +2,7 @@
 
 namespace SoccerSimulation\Simulation;
 
+use SoccerSimulation\Common\D2\C2DMatrix;
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\FSM\StateMachine;
 use SoccerSimulation\Common\Game\Region;
@@ -51,6 +52,16 @@ abstract class PlayerBase extends MovingEntity
     protected $homeRegion;
 
     /**
+     * @var float
+     */
+    protected $maxSpeedWithBall;
+
+    /**
+     * @var float
+     */
+    protected $maxSpeedWithoutBall;
+
+    /**
      * @var int
      *
      * the region this player moves to before kickoff
@@ -71,26 +82,36 @@ abstract class PlayerBase extends MovingEntity
     private $debugMessages = array();
 
     /**
+     * @var float
+     *
+     * the maximum rate (radians per second)this player can rotate
+     */
+    protected $maxTurnRate;
+
+    /**
      * @param SoccerTeam $homeTeam
      * @param int $homeRegion
      * @param Vector2D $heading
      * @param Vector2D $velocity
      * @param float $mass
      * @param float $maxForce
-     * @param float $maxSpeed
-     * @param float $maxTurnRate
-     * @param float $scale
+     * @param float $maxSpeedWithBall
+     * @param float $maxSpeedWithoutBall
      * @param string $role
      */
-    public function __construct(SoccerTeam $homeTeam, $homeRegion, Vector2D $heading, Vector2D $velocity, $mass, $maxForce, $maxSpeed, $maxTurnRate, $scale, $role)
+    public function __construct(SoccerTeam $homeTeam, $homeRegion, Vector2D $heading, Vector2D $velocity, $mass, $maxForce, $maxSpeedWithBall, $maxSpeedWithoutBall, $role)
     {
-        parent::__construct($homeTeam->getPitch()->getRegionFromIndex($homeRegion)->getCenter(), $scale * 10.0, $velocity, $maxSpeed, $heading, $mass, new Vector2D($scale, $scale), $maxTurnRate, $maxForce);
+        $scale = Prm::PlayerScale;
+        parent::__construct($homeTeam->getPitch()->getRegionFromIndex($homeRegion)->getCenter(), $scale * 5.0, $velocity, $heading, $mass, new Vector2D($scale, $scale), $maxForce);
         $this->team = $homeTeam;
         $this->distanceToBallSquared = null; // @todo needs to be maxFloat
         $this->homeRegion = $homeRegion;
         $this->defaultRegion = $homeRegion;
         $this->role = $role;
-        $this->boundingRadius = 10;
+        $this->boundingRadius = 5;
+        $this->maxSpeedWithBall = $maxSpeedWithBall;
+        $this->maxSpeedWithoutBall = $maxSpeedWithoutBall;
+        $this->maxTurnRate = Prm::PlayerMaxTurnRate;
 
         //set up the steering behavior class
         $this->steering = new SteeringBehaviors($this, $this->getBall());
@@ -98,6 +119,14 @@ abstract class PlayerBase extends MovingEntity
         //a player's start target is its start position (because it's just waiting)
         $this->steering->setTarget($homeTeam->getPitch()->getRegionFromIndex($homeRegion)->getCenter());
         (new AutoList())->add($this);
+    }
+
+    /**
+     * @return float
+     */
+    public function getMaxTurnRate()
+    {
+        return $this->maxTurnRate;
     }
 
     /**
@@ -124,6 +153,14 @@ abstract class PlayerBase extends MovingEntity
         // next opp
 
         return false;
+    }
+
+    /**
+     * @return float
+     */
+    public function getMaxSpeed()
+    {
+        return $this->hasBall() ? $this->maxSpeedWithBall : $this->maxSpeedWithoutBall;
     }
 
     /**
@@ -283,36 +320,20 @@ abstract class PlayerBase extends MovingEntity
     }
 
     /**
+     * @return bool
+     */
+    public function hasBall()
+    {
+        return $this->isControllingPlayer() && $this->isBallWithinReceivingRange();
+    }
+
+    /**
      * @return true if the player is located in the designated 'hot region' --
      * the area close to the opponent's goal (1/3 of the pitch)
      */
     public function isInHotRegion()
     {
         return abs($this->getPosition()->x - $this->getTeam()->getOpponentsGoal()->getCenter()->x) < $this->getPitch()->getPlayingArea()->getLength() / 3.0;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isInPenaltyArea()
-    {
-        return false;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isInOwnPenaltyArea()
-    {
-        return false;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isInOpponentsPenaltyArea()
-    {
-        return false;
     }
 
     public function getRole()
@@ -420,6 +441,55 @@ abstract class PlayerBase extends MovingEntity
     public function render()
     {
         throw new \Exception('dont use render method');
+    }
+
+    /**
+     * @param Vector2D $target
+     *
+     * @return bool true when the heading is facing in the desired direction
+     *
+     * given a target position, this method rotates the entity's heading and
+     * side vectors by an amount not greater than m_dMaxTurnRate until it
+     * directly faces the target.
+     */
+    public function rotateHeadingToFacePosition(Vector2D $target)
+    {
+        $toTarget = Vector2D::vectorNormalize(Vector2D::staticSub($target, $this->position));
+
+        //first determine the angle between the heading vector and the target
+        $angle = acos($this->heading->dot($toTarget));
+
+        //sometimes m_vHeading.Dot(toTarget) == 1.000000002
+        if (is_nan($angle)) {
+            $angle = 0;
+        }
+
+        //return true if the player is facing the target
+        if ($angle < 0.00001)
+        {
+            return true;
+        }
+
+        //clamp the amount to turn to the max turn rate
+        if ($angle > $this->maxTurnRate)
+        {
+            $angle = $this->maxTurnRate;
+        }
+
+        //The next few lines use a rotation matrix to rotate the player's heading
+        //vector accordingly
+        $RotationMatrix = new C2DMatrix();
+
+        //notice how the direction of rotation has to be determined when creating
+        //the rotation matrix
+        $RotationMatrix->rotate($angle * $this->heading->sign($toTarget));
+        $RotationMatrix->transformVector2Ds($this->heading);
+        $RotationMatrix->transformVector2Ds($this->velocity);
+
+        //finally recreate m_vSide
+        $this->side = $this->heading->getPerpendicular();
+
+        return false;
     }
 
     /**

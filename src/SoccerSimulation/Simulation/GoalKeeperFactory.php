@@ -5,7 +5,7 @@ namespace SoccerSimulation\Simulation;
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Simulation\GoalKeeperStates\TendGoal;
 
-class GoalKeeperFactory
+class GoalKeeperFactory extends PlayerBaseFactory
 {
     /**
      * @param SoccerTeam $team
@@ -20,10 +20,10 @@ class GoalKeeperFactory
             TendGoal::getInstance(),
             new Vector2D(0, -1),
             new Vector2D(0.0, 0.0),
-            Prm::PlayerMass,
-            Prm::PlayerMaxForce,
-            Prm::PlayerMaxSpeedWithoutBall,
-            Prm::PlayerMaxTurnRate,
-            Prm::PlayerScale);
+            $this->getMass(),
+            $this->getMaxForce(),
+            $this->getMaxSpeedWithBall(),
+            $this->getMaxSpeedWithoutBall()
+        );
     }
 }
