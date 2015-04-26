@@ -4,7 +4,7 @@ namespace SoccerSimulation\Simulation;
 
 class Prm
 {
-    const GoalWidth = 200;
+    const GoalWidth = 73.2;
 
     //use to set up the sweet spot calculator
     const NumSupportSpotsX = 13;

@@ -8,10 +8,8 @@ use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\FSM\StateMachine;
 use SoccerSimulation\Common\Game\EntityManager;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
-use Cunningsoft\MatchBundle\SimpleSoccer\Render\Team;
 use SoccerSimulation\Simulation\FieldPlayerStates\ReturnToHomeRegion;
 use SoccerSimulation\Simulation\FieldPlayerStates\Wait;
-use SoccerSimulation\Simulation\GoalKeeperStates\TendGoal;
 use SoccerSimulation\Simulation\TeamStates\Defending;
 
 /**
@@ -20,7 +18,7 @@ use SoccerSimulation\Simulation\TeamStates\Defending;
  *          is implemented as a finite state machine and has states for
  *          attacking, defending, and KickOff.
  */
-class SoccerTeam
+class SoccerTeam implements \JsonSerializable
 {
     const COLOR_BLUE = 'blue';
     const COLOR_RED = 'red';
@@ -171,126 +169,42 @@ class SoccerTeam
      */
     private function createPlayers()
     {
+        $fieldPlayerFactory = new FieldPlayerFactory();
+        $goalKeeperFactory = new GoalKeeperFactory();
+
         if ($this->Color() == self::COLOR_RED)
         {
-            $this->players[] = $this->createGoalKeeper(80);
-            $this->players[] = $this->createFieldPlayer(75, PlayerBase::PLAYER_ROLE_DEFENDER); // LV
-            $this->players[] = $this->createFieldPlayer(74, PlayerBase::PLAYER_ROLE_DEFENDER); // RV
-            $this->players[] = $this->createFieldPlayer(72, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
-            $this->players[] = $this->createFieldPlayer(71, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
-            $this->players[] = $this->createFieldPlayer(59, PlayerBase::PLAYER_ROLE_DEFENDER); // DM
-            $this->players[] = $this->createFieldPlayer(61, PlayerBase::PLAYER_ROLE_ATTACKER); // LM
-            $this->players[] = $this->createFieldPlayer(57, PlayerBase::PLAYER_ROLE_ATTACKER); // RM
-            $this->players[] = $this->createFieldPlayer(52, PlayerBase::PLAYER_ROLE_ATTACKER); // OM
-            $this->players[] = $this->createFieldPlayer(44, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
-            $this->players[] = $this->createFieldPlayer(46, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
+            $this->players[] = $goalKeeperFactory->create($this, 80);
+            $this->players[] = $fieldPlayerFactory->create($this, 75, PlayerBase::PLAYER_ROLE_DEFENDER); // LV
+            $this->players[] = $fieldPlayerFactory->create($this, 74, PlayerBase::PLAYER_ROLE_DEFENDER); // RV
+            $this->players[] = $fieldPlayerFactory->create($this, 72, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
+            $this->players[] = $fieldPlayerFactory->create($this, 71, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
+            $this->players[] = $fieldPlayerFactory->create($this, 59, PlayerBase::PLAYER_ROLE_DEFENDER); // DM
+            $this->players[] = $fieldPlayerFactory->create($this, 61, PlayerBase::PLAYER_ROLE_ATTACKER); // LM
+            $this->players[] = $fieldPlayerFactory->create($this, 57, PlayerBase::PLAYER_ROLE_ATTACKER); // RM
+            $this->players[] = $fieldPlayerFactory->create($this, 52, PlayerBase::PLAYER_ROLE_ATTACKER); // OM
+            $this->players[] = $fieldPlayerFactory->create($this, 44, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
+            $this->players[] = $fieldPlayerFactory->create($this, 46, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
         }
         else
         {
-            $this->players[] = $this->createGoalKeeper(3);
-            $this->players[] = $this->createFieldPlayer(8, PlayerBase::PLAYER_ROLE_DEFENDER); // LV
-            $this->players[] = $this->createFieldPlayer(9, PlayerBase::PLAYER_ROLE_DEFENDER); // RV
-            $this->players[] = $this->createFieldPlayer(11, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
-            $this->players[] = $this->createFieldPlayer(12, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
-            $this->players[] = $this->createFieldPlayer(24, PlayerBase::PLAYER_ROLE_DEFENDER); // DM
-            $this->players[] = $this->createFieldPlayer(22, PlayerBase::PLAYER_ROLE_ATTACKER); // LM
-            $this->players[] = $this->createFieldPlayer(26, PlayerBase::PLAYER_ROLE_ATTACKER); // RM
-            $this->players[] = $this->createFieldPlayer(31, PlayerBase::PLAYER_ROLE_ATTACKER); // OM
-            $this->players[] = $this->createFieldPlayer(37, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
-            $this->players[] = $this->createFieldPlayer(39, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
+            $this->players[] = $goalKeeperFactory->create($this, 3);
+            $this->players[] = $fieldPlayerFactory->create($this, 8, PlayerBase::PLAYER_ROLE_DEFENDER); // LV
+            $this->players[] = $fieldPlayerFactory->create($this, 9, PlayerBase::PLAYER_ROLE_DEFENDER); // RV
+            $this->players[] = $fieldPlayerFactory->create($this, 11, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
+            $this->players[] = $fieldPlayerFactory->create($this, 12, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
+            $this->players[] = $fieldPlayerFactory->create($this, 24, PlayerBase::PLAYER_ROLE_DEFENDER); // DM
+            $this->players[] = $fieldPlayerFactory->create($this, 22, PlayerBase::PLAYER_ROLE_ATTACKER); // LM
+            $this->players[] = $fieldPlayerFactory->create($this, 26, PlayerBase::PLAYER_ROLE_ATTACKER); // RM
+            $this->players[] = $fieldPlayerFactory->create($this, 31, PlayerBase::PLAYER_ROLE_ATTACKER); // OM
+            $this->players[] = $fieldPlayerFactory->create($this, 37, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
+            $this->players[] = $fieldPlayerFactory->create($this, 39, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
         }
 
         foreach ($this->players as $player)
         {
             EntityManager::getInstance()->RegisterEntity($player);
         }
-    }
-
-    private function createGoalKeeper($homeRegion)
-    {
-        return new GoalKeeper(
-            $this,
-            $homeRegion,
-            TendGoal::getInstance(),
-            new Vector2D(0, -1),
-            new Vector2D(0.0, 0.0),
-            Prm::PlayerMass,
-            Prm::PlayerMaxForce,
-            Prm::PlayerMaxSpeedWithoutBall,
-            Prm::PlayerMaxTurnRate,
-            Prm::PlayerScale);
-    }
-
-    private function createFieldPlayer($homeRegion, $role)
-    {
-        return new FieldPlayer(
-            $this,
-            $homeRegion,
-            Wait::getInstance(),
-            new Vector2D(0, -1),
-            new Vector2D(0, 0),
-            Prm::PlayerMass,
-            Prm::PlayerMaxForce,
-            Prm::PlayerMaxSpeedWithoutBall,
-            Prm::PlayerMaxTurnRate,
-            Prm::PlayerScale,
-            $role);
-    }
-
-    /**
-     *  renders the players and any team related info
-     */
-    public function render()
-    {
-        $team = new Team();
-
-        foreach ($this->players as $player)
-        {
-            $team->players[] = $player->render();
-        }
-
-        //show the controlling team and player at the top of the display
-        if (Prm::bShowControllingTeam)
-        {
-            if ($this->isInControl())
-            {
-                $team->inControl = true;
-            }
-
-            if ($this->controllingPlayer != null)
-            {
-                $team->controllingPlayerId = $this->controllingPlayer->getId();
-            }
-        }
-
-        //render the sweet spots
-        if (Prm::ViewSupportSpots && $this->isInControl())
-        {
-            $team->supportSpots = $this->supportSpotCalculator->render();
-        }
-
-//define(SHOW_TEAM_STATE);
-        if (Define::SHOW_TEAM_STATE)
-        {
-            $team->state = $this->stateMachine->getNameOfCurrentState();
-        }
-
-// define(SHOW_SUPPORTING_PLAYERS_TARGET)
-        if (Define::SHOW_SUPPORTING_PLAYERS_TARGET)
-        {
-            if ($this->supportingPlayer != null)
-            {
-                $team->supportingPlayerTargetX = $this->supportingPlayer->getSteering()->getTarget()->x;
-                $team->supportingPlayerTargetY = $this->supportingPlayer->getSteering()->getTarget()->y;
-            }
-        }
-
-        if (Define::SHOW_DEBUG_MESSAGES)
-        {
-            $team->debug = $this->getDebugMessages();
-        }
-
-        return $team;
     }
 
     /**
@@ -870,5 +784,25 @@ class SoccerTeam
     public function getDebugMessages()
     {
         return $this->debugMessages;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            'players' => $this->players,
+            'inControl' => $this->isInControl(),
+            'state' => $this->stateMachine->getNameOfCurrentState(),
+            'supportSpots' => $this->supportSpotCalculator->getSupportSpots(),
+            'controllingPlayer' => $this->controllingPlayer,
+            'debug' => $this->getDebugMessages(),
+        ];
+    }
+
+    /**
+     *  renders the players and any team related info
+     */
+    public function render()
+    {
+        throw new \Exception('dont use render');
     }
 }

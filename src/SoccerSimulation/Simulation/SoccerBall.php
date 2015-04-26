@@ -14,7 +14,7 @@ use Cunningsoft\MatchBundle\SimpleSoccer\Render\Ball;
  *        MovingEntity and provides further functionality for collision
  *        testing and position prediction.
  */
-class SoccerBall extends MovingEntity
+class SoccerBall extends MovingEntity implements \JsonSerializable
 {
     /**
      * @var Vector2D
@@ -174,11 +174,7 @@ class SoccerBall extends MovingEntity
      */
     public function render()
     {
-        $ball = new Ball();
-        $ball->x = $this->position->x;
-        $ball->y = $this->position->y;
-
-        return $ball;
+        throw new \Exception('dont call the render method anymore. instead the object itself is serialized and used');
     }
 
     //a soccer ball doesn't need to handle messages
@@ -315,5 +311,15 @@ class SoccerBall extends MovingEntity
     static private function getRandomClamped()
     {
         return mt_rand(0, 1000000) / 1000000 - mt_rand(0, 1000000) / 1000000;
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'position' => $this->position,
+        ];
     }
 }

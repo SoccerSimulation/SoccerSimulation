@@ -351,18 +351,6 @@ class SteeringBehaviors
         return $this->steeringForce;
     }
 
-    /**
-     * renders visual aids and info for seeing how each behavior is
-     * calculated
-     */
-    public function render()
-    {
-        //render the steering force
-        $to = Vector2D::staticAdd($this->player->getPosition(), Vector2D::staticMul($this->steeringForce, 20));
-
-        return $to;
-    }
-
     public function getTarget()
     {
         return Vector2D::createByVector2D($this->target);

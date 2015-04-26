@@ -8,7 +8,6 @@ use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\FSM\StateMachine;
 use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Common\Time\Regulator;
-use Cunningsoft\MatchBundle\SimpleSoccer\Render\Player;
 use SoccerSimulation\Simulation\FieldPlayerStates\GlobalPlayerState;
 
 /**
@@ -16,15 +15,8 @@ use SoccerSimulation\Simulation\FieldPlayerStates\GlobalPlayerState;
  *           capable of moving around a soccer pitch, kicking, dribbling,
  *           shooting etc
  */
-class FieldPlayer extends PlayerBase
+class FieldPlayer extends PlayerBase implements \JsonSerializable
 {
-    /**
-     * @var StateMachine
-     *
-     * an instance of the state machine class
-     */
-    private $stateMachine;
-
     /**
      * @var Regulator
      *
@@ -132,40 +124,6 @@ class FieldPlayer extends PlayerBase
         $this->velocity->truncate($this->maxSpeed);
         //update the position
         $this->position->add($this->velocity);
-    }
-
-    public function render() {
-        $player = new Player();
-
-        if (Prm::HighlightIfThreatened && ($this->getTeam()->getControllingPlayer() == $this) && $this->isThreatened()) {
-            $player->isThreatened = true;
-        }
-
-        $player->posX = $this->getPosition()->x;
-        $player->posY = $this->getPosition()->y;
-        $player->lookX = $this->getHeading()->x;
-        $player->lookY = $this->getHeading()->y;
-
-        if (Prm::ViewIDs) {
-            $player->id = $this->getId();
-        }
-        if (Prm::ViewStates) {
-            $player->state = $this->stateMachine->getNameOfCurrentState();
-        }
-        if (Prm::ViewTargets) {
-            $player->targetX = $this->getSteering()->getTarget()->x;
-            $player->targetY = $this->getSteering()->getTarget()->y;
-        }
-        if (Define::SHOW_STEERING_FORCE) {
-            $steering = $this->getSteering()->render();
-            $player->steeringX = $steering->x;
-            $player->steeringY = $steering->y;
-        }
-        if (Define::SHOW_DEBUG_MESSAGES) {
-            $player->debug = $this->getDebugMessages();
-        }
-
-        return $player;
     }
 
     /**

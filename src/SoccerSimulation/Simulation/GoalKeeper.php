@@ -12,15 +12,8 @@ use SoccerSimulation\Simulation\GoalKeeperStates\GlobalKeeperState;
 /**
  * Desc:   class to implement a goalkeeper agent
  */
-class GoalKeeper extends PlayerBase
+class GoalKeeper extends PlayerBase implements \JsonSerializable
 {
-    /**
-     * @var StateMachine
-     *
-     * an instance of the state machine class
-     */
-    private $stateMachine;
-
     /**
      * @var Vector2D
      *
@@ -94,36 +87,6 @@ class GoalKeeper extends PlayerBase
         if (!$this->getPitch()->hasGoalKeeperBall()) {
             $this->lookAt = Vector2D::vectorNormalize(Vector2D::staticSub($this->getBall()->getPosition(), $this->getPosition()));
         }
-    }
-
-    public function render() {
-        $player = new Player();
-
-        $player->posX = $this->getPosition()->x;
-        $player->posY = $this->getPosition()->y;
-        $player->lookX = $this->lookAt->x;
-        $player->lookY = $this->lookAt->y;
-
-        if (Prm::ViewIDs) {
-            $player->id = $this->getId();
-        }
-        if (Prm::ViewStates) {
-            $player->state = $this->stateMachine->getNameOfCurrentState();
-        }
-        if (Prm::ViewTargets) {
-            $player->targetX = $this->getSteering()->getTarget()->x;
-            $player->targetY = $this->getSteering()->getTarget()->y;
-        }
-        if (Define::SHOW_STEERING_FORCE) {
-            $steering = $this->getSteering()->render();
-            $player->steeringX = $steering->x;
-            $player->steeringY = $steering->y;
-        }
-        if (Define::SHOW_DEBUG_MESSAGES) {
-            $player->debug = $this->getDebugMessages();
-        }
-
-        return $player;
     }
 
     /**

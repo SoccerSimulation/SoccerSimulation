@@ -14,10 +14,14 @@ class Vector2D
      */
     public $y;
 
-    public function __construct($a = 0, $b = 0)
+    /**
+     * @param float $x
+     * @param float $y
+     */
+    public function __construct($x = 0.0, $y = 0.0)
     {
-        $this->x = $a;
-        $this->y = $b;
+        $this->x = $x;
+        $this->y = $y;
     }
 
     /**

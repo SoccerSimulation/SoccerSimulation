@@ -73,27 +73,7 @@ class SupportSpotCalculator
      * bright green.
      */
     public function render() {
-        $supportSpots = array();
-
-        for ($spt = 0; $spt < count($this->m_Spots); ++$spt) {
-            $spot = new \Cunningsoft\MatchBundle\SimpleSoccer\Render\SupportSpot();
-            $spot->x = $this->m_Spots[$spt]->m_vPos->x;
-            $spot->y = $this->m_Spots[$spt]->m_vPos->y;
-            $spot->r = $this->m_Spots[$spt]->m_dScore;
-            $spot->isBest = false;
-            $supportSpots[] = $spot;
-        }
-
-        if ($this->m_pBestSupportingSpot != null) {
-            $spot = new \Cunningsoft\MatchBundle\SimpleSoccer\Render\SupportSpot();
-            $spot->x = $this->m_pBestSupportingSpot->m_vPos->x;
-            $spot->y = $this->m_pBestSupportingSpot->m_vPos->y;
-            $spot->r = $this->m_pBestSupportingSpot->m_dScore;
-            $spot->isBest = true;
-            $supportSpots[] = $spot;
-        }
-
-        return $supportSpots;
+        throw new \Exception('dont use render');
     }
 
     /**
@@ -177,5 +157,13 @@ class SupportSpotCalculator
         } else {
             return $this->DetermineBestSupportingPosition();
         }
+    }
+
+    /**
+     * @return SupportSpot[]
+     */
+    public function getSupportSpots()
+    {
+        return $this->m_Spots;
     }
 }

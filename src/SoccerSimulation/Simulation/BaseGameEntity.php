@@ -21,7 +21,7 @@ abstract class BaseGameEntity
      *
      * each entity has a unique ID
      */
-    private $id;
+    protected $id;
 
     /**
      * @var int
@@ -123,7 +123,7 @@ abstract class BaseGameEntity
     /**
      * @param Vector2D $position
      */
-    public function setPosition(Vector2D $position)
+    public function placeAtPosition(Vector2D $position)
     {
         $this->position = Vector2D::createByVector2D($position);
     }

@@ -49,6 +49,7 @@ class ReceiveBall extends State
         //to the opponent's goal
         $PassThreatRadius = 70.0;
 
+        // @todo change player::isInHotRegion() to player::isInPenaltyBox
         if (($player->isInHotRegion()
                 || lcg_value() < Prm::ChanceOfUsingArriveTypeReceiveBehavior)
                 && !$player->getTeam()->isOpponentWithinRadius($player->getPosition(), $PassThreatRadius)) {

@@ -12,7 +12,7 @@ use SoccerSimulation\Common\D2\Vector2D;
  *        Each time-step the method Scored should be called to determine
  *        if a goal has been scored.
  */
-class Goal
+class Goal implements \JsonSerializable
 {
     /**
      * @var Vector2D
@@ -46,15 +46,14 @@ class Goal
     private $numberOfGoalsScored;
 
     /**
-     * @param Vector2D $left
-     * @param Vector2D $right
+     * @param Vector2D $center
      * @param Vector2D $facing
      */
-    public function __construct(Vector2D $left, Vector2D $right, Vector2D $facing)
+    public function __construct(Vector2D $center, Vector2D $facing)
     {
-        $this->leftPost = $left;
-        $this->rightPost = $right;
-        $this->center = Vector2D::staticDiv(Vector2D::staticAdd($left, $right), 2.0);
+        $this->leftPost = Vector2D::staticSub($center, new Vector2D(0, Prm::GoalWidth / 2));
+        $this->rightPost = Vector2D::staticAdd($center, new Vector2D(0, Prm::GoalWidth / 2));
+        $this->center = $center;
         $this->numberOfGoalsScored = 0;
         $this->facing = $facing;
     }
@@ -111,5 +110,18 @@ class Goal
     public function getNumberOfGoalsScored()
     {
         return $this->numberOfGoalsScored;
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'leftPost' => $this->leftPost,
+            'rightPost' => $this->rightPost,
+            'height' => Prm::GoalWidth,
+            'goalsScored' => $this->numberOfGoalsScored,
+        ];
     }
 }

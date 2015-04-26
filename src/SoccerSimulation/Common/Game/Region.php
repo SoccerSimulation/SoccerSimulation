@@ -8,7 +8,7 @@ use SoccerSimulation\Common\D2\Vector2D;
  *  Desc:   Defines a rectangular region. A region has an identifying
  *          number, and four corners.
  */
-class Region
+class Region implements \JsonSerializable
 {
     const REGION_MODIFIER_HALFSIZE = 'region_modifier_halfsize';
     const REGION_MODIFIER_NORMAL = 'region_modifier_normal';
@@ -71,22 +71,6 @@ class Region
         $this->height = abs($bottom - $top);
     }
 
-    public function render($ShowID = false)
-    {
-        $region = new \Cunningsoft\MatchBundle\SimpleSoccer\Render\Region();
-
-        $region->x = $this->left;
-        $region->y = $this->top;
-        $region->width = $this->right - $this->left;
-        $region->height = $this->bottom - $this->top;
-
-        if ($ShowID) {
-            $region->id = $this->ID();
-        }
-
-        return $region;
-    }
-
     /**
      * returns true if the given position lays inside the region. The
      * region modifier can be used to contract the region bounderies
@@ -138,5 +122,16 @@ class Region
 
     public function ID() {
         return $this->id;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            'left' => $this->left,
+            'right' => $this->right,
+            'top' => $this->top,
+            'bottom' => $this->bottom,
+            'id' => $this->id,
+        ];
     }
 }

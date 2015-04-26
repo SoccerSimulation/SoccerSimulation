@@ -3,6 +3,7 @@
 namespace SoccerSimulation\Simulation;
 
 use SoccerSimulation\Common\D2\Vector2D;
+use SoccerSimulation\Common\FSM\StateMachine;
 use SoccerSimulation\Common\Game\Region;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
 use SoccerSimulation\Common\Misc\AutoList;
@@ -19,6 +20,13 @@ abstract class PlayerBase extends MovingEntity
     const PLAYER_ROLE_GOALKEEPER = 'goalkeeper';
     const PLAYER_ROLE_DEFENDER = 'defender';
     const PLAYER_ROLE_ATTACKER = 'attacker';
+
+    /**
+     * @var StateMachine
+     *
+     * an instance of the state machine class
+     */
+    protected $stateMachine;
 
     /**
      * @var string
@@ -276,11 +284,35 @@ abstract class PlayerBase extends MovingEntity
 
     /**
      * @return true if the player is located in the designated 'hot region' --
-     * the area close to the opponent's goal
+     * the area close to the opponent's goal (1/3 of the pitch)
      */
     public function isInHotRegion()
     {
-        return abs($this->getPosition()->y - $this->getTeam()->getOpponentsGoal()->getCenter()->y) < $this->getPitch()->getPlayingArea()->getLength() / 3.0;
+        return abs($this->getPosition()->x - $this->getTeam()->getOpponentsGoal()->getCenter()->x) < $this->getPitch()->getPlayingArea()->getLength() / 3.0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInPenaltyArea()
+    {
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInOwnPenaltyArea()
+    {
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInOpponentsPenaltyArea()
+    {
+        return false;
     }
 
     public function getRole()
@@ -383,5 +415,28 @@ abstract class PlayerBase extends MovingEntity
     public function update()
     {
         $this->debugMessages = array();
+    }
+
+    public function render()
+    {
+        throw new \Exception('dont use render method');
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'id' => $this->id,
+            'position' => $this->position,
+            'heading' => $this->heading,
+            'target' => $this->steering->getTarget(),
+            'steeringForce' => Vector2D::staticAdd($this->position, Vector2D::staticMul($this->steering->getForce(), 50)),
+            'state' => $this->stateMachine->getNameOfCurrentState(),
+            'threatened' => $this->isControllingPlayer() && $this->isThreatened(),
+            'isInHotRegion' => $this->isInHotRegion(),
+            'debug' => $this->debugMessages,
+        ];
     }
 }
