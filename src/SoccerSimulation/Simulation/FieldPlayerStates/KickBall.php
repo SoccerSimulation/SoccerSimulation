@@ -78,11 +78,7 @@ class KickBall extends State
             return;
         }
 
-        //calculate the dot product of the vector pointing to the ball
-        //and the player's heading
-        $ToBall = Vector2D::staticSub($player->getBall()->getPosition(), $player->getPosition());
-        $dot = $player->getHeading()->dot(Vector2D::vectorNormalize($ToBall));
-        if ($dot < 0) {
+        if (!$player->isBallAhead()) {
             if (Define::PLAYER_STATE_INFO_ON) {
                 $this->raise(new CannotKickBallEvent($player, 'ball is behind player'));
             }
@@ -99,84 +95,96 @@ class KickBall extends State
 
         //the dot product is used to adjust the shooting force. The more
         //directly the ball is ahead, the more forceful the kick
-        $power = Prm::MaxShootingForce * $dot;
+        $power = $player->getShootingForce();
 
         //if it is determined that the player could score a goal from this position
         //OR if he should just kick the ball anyway, the player will attempt
         //to make the shot
         if ($player->getTeam()->canShoot($player->getBall()->getPosition(), $power, $ballTarget) || (lcg_value() < Prm::ChancePlayerAttemptsPotShot)) {
-            if (Define::PLAYER_STATE_INFO_ON) {
-                $this->raise(new ShotEvent($player));
-            }
-
-            //add some noise to the kick. We don't want players who are 
-            //too accurate! The amount of noise can be adjusted by altering
-            //Prm.PlayerKickingAccuracy
-            $ballTarget = SoccerBall::addNoiseToKick($player->getBall()->getPosition(), $ballTarget);
-
-            //this is the direction the ball will be kicked in
-            $KickDirection = Vector2D::staticSub($ballTarget, $player->getBall()->getPosition());
-
-            $player->getBall()->kick($KickDirection, $power);
-
-            //change state   
-            $player->getStateMachine()->changeState(Wait::getInstance());
-
-            $player->findSupport();
-
+            $this->shoot($player, $ballTarget, $power);
             return;
         }
 
         /* Attempt a pass to a player */
-
-        //if a receiver is found this will point to it
-        $receiver = null;
-
-        $power = Prm::MaxPassingForce * $dot;
-
-        //test if there are any potential candidates available to receive a pass
+        $power = $player->getPassingForce();
         $pass = $player->getTeam()->findPass($player, $ballTarget, $power, Prm::MinPassDist);
         if ($player->isThreatened() && $pass['found']) {
-            /** @var PlayerBase $receiver */
-            $receiver = clone $pass['receiver'];
-            //add some noise to the kick
-            $ballTarget = SoccerBall::addNoiseToKick($player->getBall()->getPosition(), $ballTarget);
-
-            $KickDirection = Vector2D::staticSub($ballTarget, $player->getBall()->getPosition());
-
-            $player->getBall()->kick($KickDirection, $power);
-
-            if (Define::PLAYER_STATE_INFO_ON) {
-                $this->raise(new PassEvent($player, $receiver));
-            }
-
-
-            //let the receiver know a pass is coming 
-            MessageDispatcher::getInstance()->dispatch($player->getId(),
-                    $receiver->getId(),
-                    new MessageTypes(MessageTypes::Msg_ReceiveBall),
-                    $ballTarget);
-
-
-            //the player should wait at his current position unless instruced
-            //otherwise  
-            $player->getStateMachine()->changeState(Wait::getInstance());
-
-            $player->findSupport();
-
+            $this->pass($player, $pass['receiver'], $ballTarget, $power);
             return;
-        } //cannot shoot or pass, so dribble the ball upfield
-        else {
-            $player->findSupport();
-
-            $player->getStateMachine()->changeState(Dribble::getInstance());
         }
+
+        $player->findSupport();
+        $player->getStateMachine()->changeState(Dribble::getInstance());
+    }
+
+    /**
+     * @param PlayerBase $player
+     * @param Vector2D $ballTarget
+     * @param float $power
+     */
+    private function shoot(PlayerBase $player, Vector2D $ballTarget, $power)
+    {
+        if (Define::PLAYER_STATE_INFO_ON) {
+            $this->raise(new ShotEvent($player));
+        }
+
+        //add some noise to the kick. We don't want players who are
+        //too accurate! The amount of noise can be adjusted by altering
+        //Prm.PlayerKickingAccuracy
+        $ballTarget = SoccerBall::addNoiseToKick($player->getBall()->getPosition(), $ballTarget);
+
+        //this is the direction the ball will be kicked in
+        $KickDirection = Vector2D::staticSub($ballTarget, $player->getBall()->getPosition());
+
+        $player->getBall()->kick($KickDirection, $power);
+
+        //change state
+        $player->getStateMachine()->changeState(Wait::getInstance());
+
+        $player->findSupport();
+    }
+
+    /**
+     * @param PlayerBase $player
+     * @param PlayerBase $receiver
+     * @param Vector2D $ballTarget
+     * @param float $power
+     */
+    private function pass(PlayerBase $player, PlayerBase $receiver, Vector2D $ballTarget, $power)
+    {
+        /** @var PlayerBase $r */
+        $r = clone $receiver;
+        //add some noise to the kick
+        $ballTarget = SoccerBall::addNoiseToKick($player->getBall()->getPosition(), $ballTarget);
+
+        $KickDirection = Vector2D::staticSub($ballTarget, $player->getBall()->getPosition());
+
+        $player->getBall()->kick($KickDirection, $power);
+
+        if (Define::PLAYER_STATE_INFO_ON) {
+            $this->raise(new PassEvent($player, $r));
+        }
+
+
+        //let the receiver know a pass is coming
+        MessageDispatcher::getInstance()->dispatch($player->getId(),
+                $r->getId(),
+                new MessageTypes(MessageTypes::Msg_ReceiveBall),
+                $ballTarget);
+
+
+        //the player should wait at his current position unless instruced
+        //otherwise
+        $player->getStateMachine()->changeState(Wait::getInstance());
+
+        $player->findSupport();
     }
 
     /**
      * @param FieldPlayer $player
      */
-    public function quit($player) {
+    public function quit($player)
+    {
     }
 
     /**
@@ -185,7 +193,8 @@ class KickBall extends State
      *
      * @return bool
      */
-    public function onMessage($e, Telegram $t) {
+    public function onMessage($e, Telegram $t)
+    {
         return false;
     }
 }

@@ -496,6 +496,40 @@ abstract class PlayerBase extends MovingEntity implements Nameable
     }
 
     /**
+     * @return bool
+     */
+    public function isBallAhead()
+    {
+        return $this->getDotProductToBall() > 0;
+    }
+
+    /**
+     * @return float
+     */
+    public function getShootingForce()
+    {
+        return Prm::MaxShootingForce * $this->getDotProductToBall();
+    }
+
+    /**
+     * @return float
+     */
+    public function getPassingForce()
+    {
+        return Prm::MaxPassingForce * $this->getDotProductToBall();
+    }
+
+    /**
+     * @return float
+     */
+    private function getDotProductToBall()
+    {
+        $toBall = Vector2D::staticSub($this->getBall()->getPosition(), $this->position);
+
+        return $this->heading->dot(Vector2D::vectorNormalize($toBall));
+    }
+
+    /**
      * @return string
      */
     public function getName()
@@ -519,5 +553,13 @@ abstract class PlayerBase extends MovingEntity implements Nameable
             'isInHotRegion' => $this->isInHotRegion(),
             'debug' => $this->debugMessages,
         ];
+    }
+
+    /**
+     * @return StateMachine
+     */
+    public function getStateMachine()
+    {
+        return $this->stateMachine;
     }
 }

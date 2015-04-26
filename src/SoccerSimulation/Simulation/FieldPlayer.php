@@ -133,11 +133,6 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
         return $this->stateMachine->handleMessage($message);
     }
 
-    public function getStateMachine()
-    {
-        return $this->stateMachine;
-    }
-
     public function isReadyForNextKick()
     {
         return $this->kickLimiter->isReady();
