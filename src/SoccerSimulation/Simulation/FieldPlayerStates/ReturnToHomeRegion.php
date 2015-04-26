@@ -2,6 +2,7 @@
 
 namespace SoccerSimulation\Simulation\FieldPlayerStates;
 
+use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Game\Region;
 use SoccerSimulation\Common\Messaging\Telegram;
@@ -39,8 +40,7 @@ class ReturnToHomeRegion extends State
         }
 
         if (Define::PLAYER_STATE_INFO_ON) {
-            $player->addDebugMessages('Player ' . $player->getId() . ' enters ReturnToHome state');
-            echo "Player " . $player->getId() . " enters ReturnToHome state\n";
+            $this->raise(new EnterStateEvent($this, $player));
         }
     }
 

@@ -3,6 +3,10 @@
 namespace SoccerSimulation\Simulation\FieldPlayerStates;
 
 use SoccerSimulation\Common\D2\Vector2D;
+use SoccerSimulation\Common\FSM\CannotKickBallEvent;
+use SoccerSimulation\Common\FSM\EnterStateEvent;
+use SoccerSimulation\Common\FSM\PassEvent;
+use SoccerSimulation\Common\FSM\ShotEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
 use SoccerSimulation\Common\Messaging\Telegram;
@@ -47,31 +51,41 @@ class KickBall extends State
 
 
         if (Define::PLAYER_STATE_INFO_ON) {
-            $player->addDebugMessages('Player ' . $player->getId() . ' enters kick state');
-            echo "Player " . $player->getId() . " enters kick state\n";
+            $this->raise(new EnterStateEvent($this, $player));
         }
     }
 
     /**
      * @param FieldPlayer $player
      */
-    public function execute($player) {
+    public function execute($player)
+    {
+        if ($player->getPitch()->hasGoalKeeperBall()) {
+            if (Define::PLAYER_STATE_INFO_ON) {
+                $this->raise(new CannotKickBallEvent($player, 'goalkeeper has the ball'));
+            }
+            $player->getStateMachine()->changeState(ChaseBall::getInstance());
+
+            return;
+        }
+
+        if ($player->getTeam()->getReceiver() != null) {
+            if (Define::PLAYER_STATE_INFO_ON) {
+                $this->raise(new CannotKickBallEvent($player, 'already defined a receiver'));
+            }
+            $player->getStateMachine()->changeState(ChaseBall::getInstance());
+
+            return;
+        }
+
         //calculate the dot product of the vector pointing to the ball
         //and the player's heading
         $ToBall = Vector2D::staticSub($player->getBall()->getPosition(), $player->getPosition());
         $dot = $player->getHeading()->dot(Vector2D::vectorNormalize($ToBall));
-
-        //cannot kick the ball if the goalkeeper is in possession or if it is 
-        //behind the player or if there is already an assigned receiver. So just
-        //continue chasing the ball
-        if ($player->getTeam()->getReceiver() != null
-                || $player->getPitch()->hasGoalKeeperBall()
-                || ($dot < 0)) {
+        if ($dot < 0) {
             if (Define::PLAYER_STATE_INFO_ON) {
-                $player->addDebugMessages('Goaly has ball / ball behind player');
-                echo "Goaly has ball / ball behind player\n";
+                $this->raise(new CannotKickBallEvent($player, 'ball is behind player'));
             }
-
             $player->getStateMachine()->changeState(ChaseBall::getInstance());
 
             return;
@@ -90,13 +104,9 @@ class KickBall extends State
         //if it is determined that the player could score a goal from this position
         //OR if he should just kick the ball anyway, the player will attempt
         //to make the shot
-        if ($player->getTeam()->canShoot($player->getBall()->getPosition(),
-                $power,
-                $ballTarget)
-                || (lcg_value() < Prm::ChancePlayerAttemptsPotShot)) {
+        if ($player->getTeam()->canShoot($player->getBall()->getPosition(), $power, $ballTarget) || (lcg_value() < Prm::ChancePlayerAttemptsPotShot)) {
             if (Define::PLAYER_STATE_INFO_ON) {
-                $player->addDebugMessages('Player ' . $player->getId() . ' attempts a shot at ' . $ballTarget);
-                echo "Player " . $player->getId() . " attempts a shot at " . $ballTarget . "\n";
+                $this->raise(new ShotEvent($player));
             }
 
             //add some noise to the kick. We don't want players who are 
@@ -116,7 +126,6 @@ class KickBall extends State
 
             return;
         }
-
 
         /* Attempt a pass to a player */
 
@@ -138,8 +147,7 @@ class KickBall extends State
             $player->getBall()->kick($KickDirection, $power);
 
             if (Define::PLAYER_STATE_INFO_ON) {
-                $player->addDebugMessages('Player ' . $player->getId() . ' passes the ball with force ' . $power . ' to player ' . $receiver->getId() . ' Target is ' . $ballTarget);
-                echo "Player " . $player->getId() . " passes the ball with force " . $power . "  to player " . $receiver->getId() . "  Target is " . $ballTarget . "\n";
+                $this->raise(new PassEvent($player, $receiver));
             }
 
 

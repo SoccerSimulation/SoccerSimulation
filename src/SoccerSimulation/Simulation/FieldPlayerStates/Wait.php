@@ -3,6 +3,7 @@
 namespace SoccerSimulation\Simulation\FieldPlayerStates;
 
 use SoccerSimulation\Common\D2\Vector2D;
+use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
@@ -31,10 +32,10 @@ class Wait extends State
     /**
      * @param FieldPlayer $player
      */
-    public function enter($player) {
+    public function enter($player)
+    {
         if (Define::PLAYER_STATE_INFO_ON) {
-            $player->addDebugMessages('Player ' . $player->getId() . ' enters wait state');
-            echo "Player " . $player->getId() . " enters wait state\n";
+            $this->raise(new EnterStateEvent($this, $player));
         }
 
         //if the game is not on make sure the target is the center of the player's
@@ -48,7 +49,8 @@ class Wait extends State
     /**
      * @param FieldPlayer $player
      */
-    public function execute($player) {
+    public function execute($player)
+    {
         //if the player has been jostled out of position, get back in position
         if (!$player->isAtTarget()) {
             $player->getSteering()->activateArrive();
@@ -90,7 +92,8 @@ class Wait extends State
     /**
      * @param FieldPlayer $player
      */
-    public function quit($player) {
+    public function quit($player)
+    {
     }
 
     /**
@@ -99,7 +102,8 @@ class Wait extends State
      *
      * @return bool
      */
-    public function onMessage($e, Telegram $t) {
+    public function onMessage($e, Telegram $t)
+    {
         return false;
     }
 }

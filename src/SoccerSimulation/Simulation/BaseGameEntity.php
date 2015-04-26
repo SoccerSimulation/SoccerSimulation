@@ -26,13 +26,6 @@ abstract class BaseGameEntity
     /**
      * @var int
      *
-     * every entity has a type associated with it (health, troll, ammo etc)
-     */
-    private $type;
-
-    /**
-     * @var int
-     *
      * this is the next valid ID. Each time a BaseGameEntity is instantiated
      * this value is updated
      */
@@ -64,7 +57,6 @@ abstract class BaseGameEntity
     {
         $this->boundingRadius = 0;
         $this->scale = new Vector2D(1, 1);
-        $this->type = self::$default_entity_type;
         $this->position = new Vector2D();
         $this->setId($id);
     }

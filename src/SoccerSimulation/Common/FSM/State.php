@@ -2,6 +2,7 @@
 
 namespace SoccerSimulation\Common\FSM;
 
+use SoccerSimulation\Common\Event\EventGenerator;
 use SoccerSimulation\Common\Messaging\Telegram;
 
 /**
@@ -9,17 +10,24 @@ use SoccerSimulation\Common\Messaging\Telegram;
  */
 abstract class State
 {
-  //this will execute when the state is entered
-  abstract public function enter($e);
+    use EventGenerator;
 
-  //this is the state's normal update function
-  abstract public function execute($e);
+    //this will execute when the state is entered
+    abstract public function enter($e);
 
-  //this will execute when the state is exited. (My word, isn't
-  //life full of surprises... ;o))
-  abstract public function quit($e);
-  
-  //this executes if the agent receives a message from the 
-  //message dispatcher
-  abstract public function onMessage($e, Telegram $t);
+    //this is the state's normal update function
+    abstract public function execute($e);
+
+    //this will execute when the state is exited. (My word, isn't
+    //life full of surprises... ;o))
+    abstract public function quit($e);
+
+    //this executes if the agent receives a message from the
+    //message dispatcher
+    abstract public function onMessage($e, Telegram $t);
+
+    public function getName()
+    {
+        return join('', array_slice(explode('\\', get_class($this)), -1));
+    }
 }

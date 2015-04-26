@@ -4,6 +4,7 @@ namespace SoccerSimulation\Simulation;
 
 use SoccerSimulation\Common\D2\C2DMatrix;
 use SoccerSimulation\Common\D2\Vector2D;
+use SoccerSimulation\Common\Event\EventGenerator;
 use SoccerSimulation\Common\FSM\StateMachine;
 use SoccerSimulation\Common\Game\Region;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
@@ -16,8 +17,10 @@ use SoccerSimulation\Common\Misc\AutoList;
  *        other game objects.</del> (mainly used by the steering behaviors and
  *        player state classes)
  */
-abstract class PlayerBase extends MovingEntity
+abstract class PlayerBase extends MovingEntity implements Nameable
 {
+    use EventGenerator;
+
     const PLAYER_ROLE_GOALKEEPER = 'goalkeeper';
     const PLAYER_ROLE_DEFENDER = 'defender';
     const PLAYER_ROLE_ATTACKER = 'attacker';
@@ -490,6 +493,14 @@ abstract class PlayerBase extends MovingEntity
         $this->side = $this->heading->getPerpendicular();
 
         return false;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return join('', array_slice(explode('\\', get_class($this)), -1)) . ' ' . $this->id;
     }
 
     /**

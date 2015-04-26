@@ -3,6 +3,7 @@
 namespace SoccerSimulation\Simulation\FieldPlayerStates;
 
 use SoccerSimulation\Common\D2\Vector2D;
+use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
@@ -50,22 +51,13 @@ class ReceiveBall extends State
         $PassThreatRadius = 70.0;
 
         // @todo change player::isInHotRegion() to player::isInPenaltyBox
-        if (($player->isInHotRegion()
-                || lcg_value() < Prm::ChanceOfUsingArriveTypeReceiveBehavior)
-                && !$player->getTeam()->isOpponentWithinRadius($player->getPosition(), $PassThreatRadius)) {
+        if (($player->isInHotRegion() || lcg_value() < Prm::ChanceOfUsingArriveTypeReceiveBehavior) && !$player->getTeam()->isOpponentWithinRadius($player->getPosition(), $PassThreatRadius)) {
             $player->getSteering()->activateArrive();
-
-            if (Define::PLAYER_STATE_INFO_ON) {
-                $player->addDebugMessages('Player ' . $player->getId() . ' enters receive state (Using Arrive)');
-                echo "Player " . $player->getId() . " enters receive state (Using Arrive)\n";
-            }
         } else {
             $player->getSteering()->activatePursuit();
-
-            if (Define::PLAYER_STATE_INFO_ON) {
-                $player->addDebugMessages('Player ' . $player->getId() . ' enters receive state (Using Pursuit)');
-                echo "Player " . $player->getId() . " enters receive state (Using Pursuit)\n";
-            }
+        }
+        if (Define::PLAYER_STATE_INFO_ON) {
+            $this->raise(new EnterStateEvent($this, $player));
         }
     }
 

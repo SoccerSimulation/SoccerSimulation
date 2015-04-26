@@ -44,12 +44,7 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
         $this->lookAt = new Vector2D();
 
         //set up the state machine
-        $this->stateMachine = new StateMachine($this);
-
-        $this->stateMachine->setCurrentState($startState);
-        $this->stateMachine->setPreviousState($startState);
-        $this->stateMachine->setGlobalState(GlobalKeeperState::getInstance());
-
+        $this->stateMachine = new StateMachine($this, $startState, $startState, GlobalKeeperState::getInstance());
         $this->stateMachine->getCurrentState()->enter($this);
     }
 
@@ -59,6 +54,7 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
 
         //run the logic for the current state
         $this->stateMachine->update();
+        $this->raiseMultiple($this->stateMachine->releaseEvents());
 
         //calculate the combined force from each steering behavior 
         $SteeringForce = $this->steering->calculate();
@@ -88,8 +84,13 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
 
     /**
      * routes any messages appropriately
+     *
+     * @param Telegram $message
+     *
+     * @return bool
      */
-    public function handleMessage(Telegram $message) {
+    public function handleMessage(Telegram $message)
+    {
         return $this->stateMachine->handleMessage($message);
     }
 
@@ -97,7 +98,8 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
      * @return true if the ball comes close enough for the keeper to 
      *         consider intercepting
      */
-    public function isBallWithinRangeForIntercept() {
+    public function isBallWithinRangeForIntercept()
+    {
         return (Vector2D::vectorDistanceSquared($this->getTeam()->getHomeGoal()->getCenter(), $this->getBall()->getPosition())
                 <= Prm::GoalKeeperInterceptRangeSquared());
     }
@@ -105,7 +107,8 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
     /**
      * @return true if the keeper has ventured too far away from the goalmouth
      */
-    public function isTooFarFromGoalMouth() {
+    public function isTooFarFromGoalMouth()
+    {
         return (Vector2D::vectorDistanceSquared($this->getPosition(), $this->getRearInterposeTarget())
                 > Prm::GoalKeeperInterceptRangeSquared());
     }
@@ -119,7 +122,8 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
      * To achieve this we just scale the ball's y value by the ratio of the
      * goal width to playingfield width
      */
-    public function getRearInterposeTarget() {
+    public function getRearInterposeTarget()
+    {
         $xPosTarget = $this->getTeam()->getHomeGoal()->getCenter()->x;
 
     $yPosTarget = $this->getPitch()->getPlayingArea()->getCenter()->y
@@ -129,7 +133,8 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
         return new Vector2D($xPosTarget, $yPosTarget);
     }
 
-    public function getStateMachine() {
+    public function getStateMachine()
+    {
         return $this->stateMachine;
     }
 }

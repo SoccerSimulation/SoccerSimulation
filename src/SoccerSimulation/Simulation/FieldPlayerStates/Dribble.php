@@ -3,6 +3,7 @@
 namespace SoccerSimulation\Simulation\FieldPlayerStates;
 
 use SoccerSimulation\Common\D2\Transformation;
+use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
@@ -41,8 +42,7 @@ class Dribble extends State
 
         if (Define::PLAYER_STATE_INFO_ON)
         {
-            echo "Player " . $player->getId() . " enters dribble state\n";
-            $player->addDebugMessages('Player ' . $player->getId() . ' enters dribble state');
+            $this->raise(new EnterStateEvent($this, $player));
         }
     }
 

@@ -2,6 +2,7 @@
 
 namespace SoccerSimulation\Simulation\GoalKeeperStates;
 
+use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
@@ -39,8 +40,7 @@ class InterceptBall extends State
         $keeper->getSteering()->activatePursuit();
 
         if (Define::GOALY_STATE_INFO_ON) {
-            $keeper->addDebugMessages('Goaly ' . $keeper->getId() . ' enters InterceptBall state');
-            echo "Goaly " . $keeper->getId() . " enters InterceptBall state\n";
+            $this->raise(new EnterStateEvent($this, $keeper));
         }
     }
 

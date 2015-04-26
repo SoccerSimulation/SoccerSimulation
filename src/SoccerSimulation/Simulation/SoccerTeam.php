@@ -5,9 +5,9 @@ namespace SoccerSimulation\Simulation;
 use SoccerSimulation\Common\D2\Geometry;
 use SoccerSimulation\Common\D2\Transformation;
 use SoccerSimulation\Common\D2\Vector2D;
+use SoccerSimulation\Common\Event\EventGenerator;
 use SoccerSimulation\Common\FSM\StateMachine;
 use SoccerSimulation\Common\Game\EntityManager;
-use SoccerSimulation\Common\Game\Region;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
 use SoccerSimulation\Simulation\FieldPlayerStates\ReturnToHomeRegion;
 use SoccerSimulation\Simulation\FieldPlayerStates\Wait;
@@ -19,8 +19,10 @@ use SoccerSimulation\Simulation\TeamStates\Defending;
  *          is implemented as a finite state machine and has states for
  *          attacking, defending, and KickOff.
  */
-class SoccerTeam implements \JsonSerializable
+class SoccerTeam implements \JsonSerializable, Nameable
 {
+    use EventGenerator;
+
     const COLOR_BLUE = 'blue';
     const COLOR_RED = 'red';
 
@@ -148,10 +150,7 @@ class SoccerTeam implements \JsonSerializable
         $this->playerClosestToBall = null;
 
         //setup the state machine
-        $this->stateMachine = new StateMachine($this);
-        $this->stateMachine->setCurrentState(Defending::getInstance());
-        $this->stateMachine->setPreviousState(Defending::getInstance());
-        $this->stateMachine->setGlobalState(null);
+        $this->stateMachine = new StateMachine($this, Defending::getInstance(), Defending::getInstance(), null);
 
         //create the players and goalkeeper
         $this->createPlayers();
@@ -222,11 +221,13 @@ class SoccerTeam implements \JsonSerializable
         //also handles the 'kick off' state where a team must return to their
         //kick off positions before the whistle is blown
         $this->stateMachine->update();
+        $this->raiseMultiple($this->stateMachine->releaseEvents());
 
         //now update each player
         foreach ($this->players as $player)
         {
             $player->update();
+            $this->raiseMultiple($player->releaseEvents());
         }
     }
 
@@ -762,14 +763,6 @@ class SoccerTeam implements \JsonSerializable
     }
 
     /**
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->color == self::COLOR_BLUE ? 'Blue' : 'Red';
-    }
-
-    /**
      * @param string $message
      */
     public function addDebugMessages($message)
@@ -798,10 +791,10 @@ class SoccerTeam implements \JsonSerializable
     }
 
     /**
-     *  renders the players and any team related info
+     * @return string
      */
-    public function render()
+    public function getName()
     {
-        throw new \Exception('dont use render');
+        return join('', array_slice(explode('\\', get_class($this)), -1)) . ' ' . $this->color;
     }
 }

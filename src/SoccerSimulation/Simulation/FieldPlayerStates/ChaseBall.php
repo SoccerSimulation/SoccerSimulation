@@ -2,6 +2,7 @@
 
 namespace SoccerSimulation\Simulation\FieldPlayerStates;
 
+use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
@@ -38,8 +39,7 @@ class ChaseBall extends State
 
         if (Define::PLAYER_STATE_INFO_ON)
         {
-            echo "Player " . $player->getId() . " enters chase state\n";
-            $player->addDebugMessages('Player ' . $player->getId() . ' enters chase state');
+            $this->raise(new EnterStateEvent($this, $player));
         }
     }
 

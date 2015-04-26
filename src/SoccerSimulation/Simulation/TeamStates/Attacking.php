@@ -2,6 +2,7 @@
 
 namespace SoccerSimulation\Simulation\TeamStates;
 
+use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
@@ -32,8 +33,7 @@ class Attacking extends State
      */
     public function enter($team) {
         if (Define::DEBUG_TEAM_STATES) {
-            $team->addDebugMessages($team->getName() . ' entering Attacking state');
-            echo $team->getName() . " entering Attacking state\n";
+            $this->raise(new EnterStateEvent($this, $team));
         }
 
         //these define the home regions for this state of each of the players

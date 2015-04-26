@@ -57,13 +57,9 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
                 $role);
 
         //set up the state machine
-        $this->stateMachine = new StateMachine($this);
+        $this->stateMachine = new StateMachine($this, $startState, $startState, GlobalPlayerState::getInstance());
 
         if ($startState != null) {
-            $this->stateMachine->setCurrentState($startState);
-            $this->stateMachine->setPreviousState($startState);
-            $this->stateMachine->setGlobalState(GlobalPlayerState::getInstance());
-
             $this->stateMachine->getCurrentState()->enter($this);
         }
 
@@ -83,6 +79,7 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
 
         //run the logic for the current state
         $this->stateMachine->update();
+        $this->raiseMultiple($this->stateMachine->releaseEvents());
 
         //calculate the combined steering force
         $this->steering->calculate();

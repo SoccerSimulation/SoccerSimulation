@@ -3,6 +3,8 @@
 namespace SoccerSimulation\Simulation\FieldPlayerStates;
 
 use SoccerSimulation\Common\D2\Vector2D;
+use SoccerSimulation\Common\FSM\CannotKickBallEvent;
+use SoccerSimulation\Common\FSM\MessagePassToMeEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
 use SoccerSimulation\Common\Messaging\Telegram;
@@ -109,41 +111,27 @@ class GlobalPlayerState extends State
                 /** @var FieldPlayer $receiver */
                 $receiver = $telegram->extraInfo;
 
-                if (Define::PLAYER_STATE_INFO_ON) {
-                    $player->addDebugMessages('Player ' . $player->getId() . ' received request from ' . $receiver->getId() . ' to make pass');
-                    echo "Player " . $player->getId() . " received request from " . $receiver->getId() . " to make pass\n";
-                }
-
-                //if the ball is not within kicking range or their is already a 
+                //if the ball is not within kicking range or their is already a
                 //receiving player, this player cannot pass the ball to the player
                 //making the request.
-                if ($player->getTeam()->getReceiver() != null
-                        || !$player->isBallWithinKickingRange()) {
+                if ($player->getTeam()->getReceiver() != null || !$player->isBallWithinKickingRange()) {
                     if (Define::PLAYER_STATE_INFO_ON) {
-                        $player->addDebugMessages('Player ' . $player->getId() . ' cannot make requested pass <cannot kick ball>');
-                        echo "Player " . $player->getId() . " cannot make requested pass <cannot kick ball>\n";
+                        $this->raise(new MessagePassToMeEvent($player, $receiver, false));
                     }
 
                     return true;
                 }
 
                 //make the pass   
-                $player->getBall()->kick(Vector2D::staticSub($receiver->getPosition(), $player->getBall()->getPosition()),
-                        Prm::MaxPassingForce);
+                $player->getBall()->kick(Vector2D::staticSub($receiver->getPosition(), $player->getBall()->getPosition()), Prm::MaxPassingForce);
 
 
                 if (Define::PLAYER_STATE_INFO_ON) {
-                    echo "Player " . $player->getId() . " passed ball to requesting player\n";
-                    $player->addDebugMessages('Player ' . $player->getId() . ' passed ball to requesting player');
+                    $this->raise(new MessagePassToMeEvent($player, $receiver, true));
                 }
 
                 //let the receiver know a pass is coming 
-                MessageDispatcher::getInstance()->dispatch($player->getId(),
-                        $receiver->getId(),
-                        new MessageTypes(MessageTypes::Msg_ReceiveBall),
-                        $receiver->getPosition());
-
-
+                MessageDispatcher::getInstance()->dispatch($player->getId(), $receiver->getId(), new MessageTypes(MessageTypes::Msg_ReceiveBall), $receiver->getPosition());
 
                 //change state   
                 $player->getStateMachine()->changeState(Wait::getInstance());

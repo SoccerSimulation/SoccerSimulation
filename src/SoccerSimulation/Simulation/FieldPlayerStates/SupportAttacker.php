@@ -3,6 +3,7 @@
 namespace SoccerSimulation\Simulation\FieldPlayerStates;
 
 use SoccerSimulation\Common\D2\Vector2D;
+use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
@@ -38,8 +39,7 @@ class SupportAttacker extends State
         $player->getSteering()->setTarget($player->getTeam()->getSupportSpot());
 
         if (Define::PLAYER_STATE_INFO_ON) {
-            $player->addDebugMessages('Player ' . $player->getId() . ' enters support state');
-            echo "Player " . $player->getId() . " enters support state\n";
+            $this->raise(new EnterStateEvent($this, $player));
         }
     }
 

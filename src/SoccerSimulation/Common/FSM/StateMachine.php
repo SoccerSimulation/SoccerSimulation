@@ -2,6 +2,7 @@
 
 namespace SoccerSimulation\Common\FSM;
 
+use SoccerSimulation\Common\Event\EventGenerator;
 use SoccerSimulation\Common\Messaging\Telegram;
 
 /**
@@ -10,8 +11,9 @@ use SoccerSimulation\Common\Messaging\Telegram;
  */
 class StateMachine
 {
-    //a pointer to the agent that owns this instance
+    use EventGenerator;
 
+    //a pointer to the agent that owns this instance
     private $owner;
 
     /**
@@ -33,37 +35,30 @@ class StateMachine
      */
     private $globalState;
 
-    public function __construct($owner)
+    /**
+     * @param mixed $owner
+     * @param State|null $currentState
+     * @param State|null $previousState
+     * @param State|null $globalState
+     */
+    public function __construct($owner, State $currentState = null, State $previousState = null, State $globalState = null)
     {
         $this->owner = $owner;
-        $this->currentState = null;
-        $this->previousState = null;
-        $this->globalState = null;
+        $this->currentState = $currentState;
+        $this->previousState = $previousState;
+        $this->globalState = $globalState;
     }
 
-    //use these methods to initialize the FSM
-    public function setCurrentState(State $s) {
-        $this->currentState = $s;
-    }
-
-    public function setGlobalState(State $s = null) {
-        $this->globalState = $s;
-    }
-
-    public function setPreviousState(State $s) {
-        $this->previousState = $s;
-    }
-
-    //call this to update the FSM
-    public function update() {
-        //if a global state exists, call its execute method, else do nothing
+    public function update()
+    {
         if ($this->globalState != null) {
             $this->globalState->execute($this->owner);
+            $this->raiseMultiple($this->globalState->releaseEvents());
         }
 
-        //same for the current state
         if ($this->currentState != null) {
             $this->currentState->execute($this->owner);
+            $this->raiseMultiple($this->currentState->releaseEvents());
         }
     }
 
@@ -80,7 +75,7 @@ class StateMachine
             return true;
         }
 
-        //if not, and if a global state has been implemented, send 
+        //if not, and if a global state has been implemented, send
         //the message to the global state
         if ($this->globalState != null && $this->globalState->onMessage($this->owner, $msg)) {
             return true;
@@ -92,27 +87,24 @@ class StateMachine
     //change to a new state
     public function changeState(State $pNewState)
     {
-        //keep a record of the previous state
         $this->previousState = $this->currentState;
+        $this->previousState->quit($this->owner);
+        $this->raiseMultiple($this->previousState->releaseEvents());
 
-        //call the exit method of the existing state
-        $this->currentState->quit($this->owner);
-
-        //change state to the new state
         $this->currentState = $pNewState;
-
-        //call the entry method of the new state
         $this->currentState->enter($this->owner);
+        $this->raiseMultiple($this->currentState->releaseEvents());
     }
 
     //change state back to the previous state
     public function revertToPreviousState()
     {
         $this->changeState($this->previousState);
+        $this->raiseMultiple($this->previousState->releaseEvents());
     }
 
     //returns true if the current state's type is equal to the type of the
-    //class passed as a parameter. 
+    //class passed as a parameter.
     public function isInState(State $st)
     {
         return get_class($this->currentState) == get_class($st);

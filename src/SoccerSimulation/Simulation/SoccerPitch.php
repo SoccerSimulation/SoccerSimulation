@@ -4,6 +4,7 @@ namespace SoccerSimulation\Simulation;
 
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\D2\Wall2D;
+use SoccerSimulation\Common\Event\EventGenerator;
 use SoccerSimulation\Common\Game\Region;
 use SoccerSimulation\Simulation\TeamStates\PrepareForKickOff;
 
@@ -15,6 +16,8 @@ use SoccerSimulation\Simulation\TeamStates\PrepareForKickOff;
  */
 class SoccerPitch implements \JsonSerializable
 {
+    use EventGenerator;
+
     const REGIONS_HORIZONTAL = 12;
     const REGIONS_VERTICAL = 7;
 
@@ -156,7 +159,9 @@ class SoccerPitch implements \JsonSerializable
 
         // update the teams
         $this->redTeam->update();
+        $this->raiseMultiple($this->redTeam->releaseEvents());
         $this->blueTeam->update();
+        $this->raiseMultiple($this->blueTeam->releaseEvents());
 
         // if a goal has been detected reset the pitch ready for kickoff
         if ($this->blueGoal->hasScored($this->ball) || $this->redGoal->hasScored($this->ball)) {
