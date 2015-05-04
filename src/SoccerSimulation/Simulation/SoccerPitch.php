@@ -171,7 +171,16 @@ class SoccerPitch implements \JsonSerializable
         $this->raiseMultiple($this->blueTeam->releaseEvents());
 
         // if a goal has been detected reset the pitch ready for kickoff
-        if ($this->blueGoal->hasScored($this->ball) || $this->redGoal->hasScored($this->ball)) {
+        $goalWasScored = false;
+        if ($this->blueGoal->hasScored($this->ball)) {
+            $this->blueGoal->incrementGoalsScored();
+            $goalWasScored = true;
+        }
+        if ($this->redGoal->hasScored($this->ball)) {
+            $this->redGoal->incrementGoalsScored();
+            $goalWasScored = true;
+        }
+        if ($goalWasScored) {
             $this->gameIsActive = false;
 
             // reset the ball
@@ -192,11 +201,11 @@ class SoccerPitch implements \JsonSerializable
     }
 
     /**
-     * @param bool $b
+     * @param bool $bool
      */
-    public function setGoalKeeperHasBall($b)
+    public function setGoalKeeperHasBall($bool)
     {
-        $this->goalKeeperHasBall = $b;
+        $this->goalKeeperHasBall = $bool;
     }
 
     /**
@@ -225,11 +234,6 @@ class SoccerPitch implements \JsonSerializable
     public function setGameIsActive()
     {
         $this->gameIsActive = true;
-    }
-
-    public function render()
-    {
-        throw new \Exception('dont use render');
     }
 
     public function jsonSerialize()

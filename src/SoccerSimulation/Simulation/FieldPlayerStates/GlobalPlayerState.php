@@ -3,7 +3,6 @@
 namespace SoccerSimulation\Simulation\FieldPlayerStates;
 
 use SoccerSimulation\Common\D2\Vector2D;
-use SoccerSimulation\Common\FSM\CannotKickBallEvent;
 use SoccerSimulation\Common\FSM\MessagePassToMeEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
@@ -36,27 +35,6 @@ class GlobalPlayerState extends State
 
     /**
      * @param FieldPlayer $player
-     */
-    public function enter($player)
-    {
-    }
-
-    /**
-     * @param FieldPlayer $player
-     */
-    public function execute($player)
-    {
-    }
-
-    /**
-     * @param FieldPlayer $player
-     */
-    public function quit($player)
-    {
-    }
-
-    /**
-     * @param FieldPlayer $player
      * @param Telegram $telegram
      *
      * @return bool
@@ -64,53 +42,29 @@ class GlobalPlayerState extends State
     public function onMessage($player, Telegram $telegram)
     {
         switch ($telegram->message->messageType) {
-            case MessageTypes::Msg_ReceiveBall: {
-                //set the target
+            case MessageTypes::Msg_ReceiveBall:
                 $player->getSteering()->setTarget($telegram->extraInfo);
-
-                //change state 
                 $player->getStateMachine()->changeState(ReceiveBall::getInstance());
-
                 return true;
-            }
-            //break;
 
-            case MessageTypes::Msg_SupportAttacker: {
-                //if already supporting just return
+            case MessageTypes::Msg_SupportAttacker:
                 if ($player->getStateMachine()->isInState(SupportAttacker::getInstance())) {
                     return true;
                 }
-
-                //set the target to be the best supporting position
                 $player->getSteering()->setTarget($player->getTeam()->getSupportSpot());
-
-                //change the state
                 $player->getStateMachine()->changeState(SupportAttacker::getInstance());
-
                 return true;
-            }
 
-            //break;
-
-            case MessageTypes::Msg_Wait: {
-                //change the state
+            case MessageTypes::Msg_Wait:
                 $player->getStateMachine()->changeState(Wait::getInstance());
-
                 return true;
-            }
-            // break;
 
-            case MessageTypes::Msg_GoHome: {
+            case MessageTypes::Msg_GoHome:
                 $player->setDefaultHomeRegion();
-
                 $player->getStateMachine()->changeState(ReturnToHomeRegion::getInstance());
-
                 return true;
-            }
 
-            // break;
-
-            case MessageTypes::Msg_PassToMe: {
+            case MessageTypes::Msg_PassToMe:
                 //get the position of the player requesting the pass
                 /** @var FieldPlayer $receivingPlayer */
                 $receivingPlayer = $telegram->extraInfo;
@@ -145,11 +99,7 @@ class GlobalPlayerState extends State
                 $player->findSupport();
 
                 return true;
-            }
-
-            //break;
-
-        }//end switch
+        }
 
         return false;
     }

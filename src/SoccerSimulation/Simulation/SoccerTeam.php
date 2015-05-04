@@ -7,7 +7,6 @@ use SoccerSimulation\Common\D2\Transformation;
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\Event\EventGenerator;
 use SoccerSimulation\Common\FSM\StateMachine;
-use SoccerSimulation\Common\Game\EntityManager;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
 use SoccerSimulation\Simulation\FieldPlayerStates\ReturnToHomeRegion;
 use SoccerSimulation\Simulation\FieldPlayerStates\Wait;
@@ -124,25 +123,25 @@ class SoccerTeam implements \JsonSerializable, Nameable
      * called each frame. Sets m_pClosestPlayerToBall to point to the player
      * closest to the ball.
      */
-    private function CalculateClosestPlayerToBall()
+    private function calculateClosestPlayerToBall()
     {
-        $ClosestSoFar = null;
+        $closestSoFar = null;
 
-        foreach ($this->getPlayers() as $cur) {
+        foreach ($this->getPlayers() as $player) {
             //calculate the dist. Use the squared value to avoid sqrt
-            $dist = Vector2D::vectorDistanceSquared($cur->getPosition(), $this->getPitch()->getBall()->getPosition());
+            $dist = Vector2D::vectorDistanceSquared($player->getPosition(), $this->getPitch()->getBall()->getPosition());
 
             //keep a record of this value for each player
-            $cur->setDistanceToBallSquared($dist);
+            $player->setDistanceToBallSquared($dist);
 
-            if ($ClosestSoFar === null || $dist < $ClosestSoFar) {
-                $ClosestSoFar = $dist;
+            if ($closestSoFar === null || $dist < $closestSoFar) {
+                $closestSoFar = $dist;
 
-                $this->playerClosestToBall = $cur;
+                $this->playerClosestToBall = $player;
             }
         }
 
-        $this->distanceToBallOfClosestPlayerSquared = $ClosestSoFar;
+        $this->distanceToBallOfClosestPlayerSquared = $closestSoFar;
     }
 
     public function __construct(Goal $homeGoal, Goal $opponentsGoal, SoccerPitch $pitch, $color)
@@ -164,10 +163,6 @@ class SoccerTeam implements \JsonSerializable, Nameable
         //create the players and goalkeeper
         $this->createPlayers();
 
-        foreach ($this->getPlayers() as $player) {
-            $player->getSteering()->activateSeparation();
-        }
-
         //create the sweet spot calculator
         $this->supportSpotCalculator = new SupportSpotCalculator(Prm::NumSupportSpotsX, Prm::NumSupportSpotsY, $this);
     }
@@ -180,8 +175,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
         $fieldPlayerFactory = new FieldPlayerFactory();
         $goalKeeperFactory = new GoalKeeperFactory();
 
-        $this->goalkeeper = $this->Color() == self::COLOR_RED ? $goalKeeperFactory->create($this,
-            80) : $goalKeeperFactory->create($this, 3);
+        $this->goalkeeper = $goalKeeperFactory->create($this, $this->color == self::COLOR_RED ? 80 : 3);
         $this->fieldPlayers = $fieldPlayerFactory->createCompleteLineUp($this);
     }
 
@@ -193,7 +187,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
     {
         //this information is used frequently so it's more efficient to 
         //calculate it just once each frame
-        $this->CalculateClosestPlayerToBall();
+        $this->calculateClosestPlayerToBall();
 
         //the team state machine switches between attack/defense behavior. It
         //also handles the 'kick off' state where a team must return to their
@@ -216,7 +210,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
     public function returnAllFieldPlayersToHome()
     {
         foreach ($this->getPlayers() as $player) {
-            if ($player->getRole() != PlayerBase::PLAYER_ROLE_GOALKEEPER) {
+            if (!$player->isGoalkeeper()) {
                 MessageDispatcher::getInstance()->dispatch($this->goalkeeper, $player,
                     new MessageTypes(MessageTypes::Msg_GoHome), null);
             }
@@ -233,6 +227,12 @@ class SoccerTeam implements \JsonSerializable, Nameable
      * returns true if player has a clean shot at the goal and sets ShotTarget
      * to a normalized vector pointing in the direction the shot should be
      * made. Else returns false and sets heading to a zero vector
+     *
+     * @param Vector2D $BallPos
+     * @param float $power
+     * @param Vector2D $ShotTarget
+     *
+     * @return bool
      */
     public function canShoot(Vector2D $BallPos, $power, Vector2D $ShotTarget = null)
     {
@@ -275,18 +275,18 @@ class SoccerTeam implements \JsonSerializable, Nameable
     }
 
     /**
+     * The best pass is considered to be the pass that cannot be intercepted
+     * by an opponent and that is as far forward of the receiver as possible
+     * If a pass is found, the receiver's address is returned in the
+     * reference, 'receiver' and the position the pass will be made to is
+     * returned in the  reference 'PassTarget'
+     *
      * @param PlayerBase $passer
      * @param Vector2D $PassTarget
      * @param float $power
      * @param float $MinPassingDistance
      *
      * @return bool
-     *
-     * The best pass is considered to be the pass that cannot be intercepted
-     * by an opponent and that is as far forward of the receiver as possible
-     * If a pass is found, the receiver's address is returned in the
-     * reference, 'receiver' and the position the pass will be made to is
-     * returned in the  reference 'PassTarget'
      */
     public function findPass(PlayerBase $passer, Vector2D $PassTarget, $power, $MinPassingDistance)
     {
@@ -297,13 +297,13 @@ class SoccerTeam implements \JsonSerializable, Nameable
         $receiver = null;
         //iterate through all this player's team members and calculate which
         //one is in a position to be passed the ball
-        foreach ($this->getPlayers() as $curPlyr) {
+        foreach ($this->getPlayers() as $player) {
             //make sure the potential receiver being examined is not this player
             //and that it is further away than the minimum pass distance
-            if (($curPlyr != $passer) && (Vector2D::vectorDistanceSquared($passer->getPosition(),
-                        $curPlyr->getPosition()) > $MinPassingDistance * $MinPassingDistance)
+            if (($player != $passer) && (Vector2D::vectorDistanceSquared($passer->getPosition(),
+                        $player->getPosition()) > $MinPassingDistance * $MinPassingDistance)
             ) {
-                if ($this->getBestPassToReceiver($passer, $curPlyr, $Target, $power)) {
+                if ($this->getBestPassToReceiver($player, $Target, $power)) {
                     //if the pass target is the closest to the opponent's goal line found
                     // so far, keep a record of it
                     $Dist2Goal = abs($Target->x - $this->getOpponentsGoal()->getCenter()->x);
@@ -312,7 +312,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
                         $ClosestToGoalSoFar = $Dist2Goal;
 
                         //keep a record of this player
-                        $receiver = $curPlyr;
+                        $receiver = $player;
 
                         //and the target
                         $PassTarget->set($Target);
@@ -322,8 +322,6 @@ class SoccerTeam implements \JsonSerializable, Nameable
                 }
             }
         }
-
-        //next team member
 
         return array('receiver' => $receiver, 'found' => $found);
     }
@@ -337,8 +335,14 @@ class SoccerTeam implements \JsonSerializable, Nameable
      *  all the passes are invalidated the function returns false. Otherwise
      *  the function returns the pass that takes the ball closest to the
      *  opponent's goal area.
+     *
+     * @param PlayerBase $receiver
+     * @param Vector2D $PassTarget
+     * @param float $power
+     *
+     * @return bool
      */
-    public function getBestPassToReceiver(PlayerBase $passer, PlayerBase $receiver, Vector2D $PassTarget, $power)
+    public function getBestPassToReceiver(PlayerBase $receiver, Vector2D $PassTarget, $power)
     {
         //first, calculate how much time it will take for the ball to reach
         //this receiver, if the receiver was to remain motionless 
@@ -401,11 +405,19 @@ class SoccerTeam implements \JsonSerializable, Nameable
     /**
      * test if a pass from positions 'from' to 'target' kicked with force
      * 'PassingForce'can be intercepted by an opposing player
+     *
+     * @param Vector2D $from
+     * @param Vector2D $target
+     * @param PlayerBase $opponentPlayer
+     * @param float $PassingForce
+     * @param PlayerBase $receiver
+     *
+     * @return bool
      */
     public function isPassSafeFromOpponent(
         Vector2D $from,
         Vector2D $target,
-        PlayerBase $opp,
+        PlayerBase $opponentPlayer,
         $PassingForce,
         PlayerBase $receiver = null
     ) {
@@ -413,7 +425,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
         $ToTarget = Vector2D::staticSub($target, $from);
         $ToTargetNormalized = Vector2D::vectorNormalize($ToTarget);
 
-        $LocalPosOpp = Transformation::PointToLocalSpace($opp->getPosition(),
+        $LocalPosOpp = Transformation::PointToLocalSpace($opponentPlayer->getPosition(),
             $ToTargetNormalized,
             $ToTargetNormalized->getPerpendicular(),
             $from);
@@ -427,12 +439,9 @@ class SoccerTeam implements \JsonSerializable, Nameable
 
         //if the opponent is further away than the target we need to consider if
         //the opponent can reach the position before the receiver.
-        if (Vector2D::vectorDistanceSquared($from, $target) < Vector2D::vectorDistanceSquared($opp->getPosition(),
-                $from)
-        ) {
+        if ($from->distanceTo($target) < $from->distanceTo($opponentPlayer->getPosition())) {
             if ($receiver != null) {
-                return Vector2D::vectorDistanceSquared($target,
-                    $opp->getPosition()) > Vector2D::vectorDistanceSquared($target, $receiver->getPosition());
+                return $opponentPlayer->distanceTo($target) > $receiver->distanceTo($target);
             } else {
                 return true;
             }
@@ -446,9 +455,9 @@ class SoccerTeam implements \JsonSerializable, Nameable
                 $PassingForce);
 
         //now calculate how far the opponent can run in this time
-        $reach = $opp->getMaxSpeed() * $TimeForBall
+        $reach = $opponentPlayer->getMaxSpeed() * $TimeForBall
             + $this->getPitch()->getBall()->getBoundingRadius()
-            + $opp->getBoundingRadius();
+            + $opponentPlayer->getBoundingRadius();
 
         //if the distance to the opponent's y position is less than his running
         //range plus the radius of the ball and the opponents radius then the
@@ -464,16 +473,23 @@ class SoccerTeam implements \JsonSerializable, Nameable
      * tests a pass from position 'from' to position 'target' against each member
      * of the opposing team. Returns true if the pass can be made without
      * getting intercepted
+     *
+     * @param Vector2D $from
+     * @param Vector2D $target
+     * @param float $passingForce
+     * @param PlayerBase $receivingPlayer
+     *
+     * @return bool
      */
     public function isPassSafeFromAllOpponents(
         Vector2D $from,
         Vector2D $target,
-        $PassingForce,
-        PlayerBase $receiver = null
+        $passingForce,
+        PlayerBase $receivingPlayer = null
     ) {
 
-        foreach ($this->getOpponent()->getMembers() as $opp) {
-            if (!$this->isPassSafeFromOpponent($from, $target, $opp, $PassingForce, $receiver)) {
+        foreach ($this->getOpponent()->getPlayers() as $opponentPlayer) {
+            if (!$this->isPassSafeFromOpponent($from, $target, $opponentPlayer, $passingForce, $receivingPlayer)) {
                 return false;
             }
         }
@@ -484,13 +500,18 @@ class SoccerTeam implements \JsonSerializable, Nameable
     /**
      * returns true if an opposing player is within the radius of the position
      * given as a par ameter
+     *
+     * @param Vector2D $position
+     * @param float $radius
+     *
+     * @return bool
      */
-    public function isOpponentWithinRadius(Vector2D $pos, $rad)
+    public function isOpponentWithinRadius(Vector2D $position, $radius)
     {
-        /** @var PlayerBase[] $members */
-        $members = $this->getOpponent()->getMembers();
-        foreach ($members as $it) {
-            if (Vector2D::vectorDistanceSquared($pos, $it->getPosition()) < $rad * $rad) {
+        /** @var PlayerBase[] $players */
+        $players = $this->getOpponent()->getPlayers();
+        foreach ($players as $player) {
+            if ($player->distanceTo($position) < $radius) {
                 return true;
             }
         }
@@ -502,6 +523,8 @@ class SoccerTeam implements \JsonSerializable, Nameable
      * this tests to see if a pass is possible between the requester and
      * the controlling player. If it is possible a message is sent to the
      * controlling player to pass the ball asap.
+     *
+     * @param FieldPlayer $requestingPlayer
      */
     public function requestPass(FieldPlayer $requestingPlayer)
     {
@@ -530,11 +553,11 @@ class SoccerTeam implements \JsonSerializable, Nameable
 
         $BestPlayer = null;
 
-        foreach ($this->getPlayers() as $cur) {
+        foreach ($this->fieldPlayers as $player) {
             //only attackers utilize the BestSupportingSpot
-            if (($cur->getRole() == PlayerBase::PLAYER_ROLE_ATTACKER) && ($cur != $this->controllingPlayer)) {
+            if (($player->getRole() == FieldPlayer::PLAYER_ROLE_ATTACKER) && !$player->isControllingPlayer()) {
                 //calculate the dist. Use the squared value to avoid sqrt
-                $dist = Vector2D::vectorDistanceSquared($cur->getPosition(),
+                $dist = Vector2D::vectorDistanceSquared($player->getPosition(),
                     $this->supportSpotCalculator->GetBestSupportingSpot());
 
                 //if the distance is the closest so far and the player is not a
@@ -542,20 +565,12 @@ class SoccerTeam implements \JsonSerializable, Nameable
                 //the ball, keep a record of this player
                 if ($ClosestSoFar == null || $dist < $ClosestSoFar) {
                     $ClosestSoFar = $dist;
-                    $BestPlayer = $cur;
+                    $BestPlayer = $player;
                 }
             }
         }
 
         return $BestPlayer;
-    }
-
-    /**
-     * @return PlayerBase
-     */
-    public function getMembers()
-    {
-        return $this->getPlayers();
     }
 
     /**
@@ -591,7 +606,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
         $this->opponent = $opps;
     }
 
-    public function Color()
+    public function getColor()
     {
         return $this->color;
     }
@@ -683,28 +698,22 @@ class SoccerTeam implements \JsonSerializable, Nameable
 
     public function updateTargetsOfWaitingPlayers()
     {
-        foreach ($this->getPlayers() as $cur) {
-            if ($cur->getRole() != PlayerBase::PLAYER_ROLE_GOALKEEPER) {
-                //cast to a field player
-                /** @var FieldPlayer $plyr */
-                $plyr = $cur;
-
-                if ($plyr->getStateMachine()->isInState(Wait::getInstance())
-                    || $plyr->getStateMachine()->isInState(ReturnToHomeRegion::getInstance())
-                ) {
-                    $plyr->getSteering()->setTarget($plyr->getHomeRegion()->getCenter());
-                }
+        foreach ($this->fieldPlayers as $player) {
+            if ($player->getStateMachine()->isInState(Wait::getInstance())
+                || $player->getStateMachine()->isInState(ReturnToHomeRegion::getInstance())
+            ) {
+                $player->getSteering()->setTarget($player->getHomeRegion()->getCenter());
             }
         }
     }
 
     /**
-     * @return false if any of the team are not located within their home region
+     * @return bool
      */
     public function allPlayersAtHome()
     {
-        foreach ($this->getPlayers() as $it) {
-            if ($it->isInHomeRegion() == false) {
+        foreach ($this->getPlayers() as $player) {
+            if (!$player->isInHomeRegion()) {
                 return false;
             }
         }

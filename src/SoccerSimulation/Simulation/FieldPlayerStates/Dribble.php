@@ -5,7 +5,6 @@ namespace SoccerSimulation\Simulation\FieldPlayerStates;
 use SoccerSimulation\Common\D2\Transformation;
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\FieldPlayer;
 use SoccerSimulation\Simulation\Prm;
@@ -80,23 +79,5 @@ class Dribble extends State
         $player->getStateMachine()->changeState(ChaseBall::getInstance());
 
         return;
-    }
-
-    /**
-     * @param FieldPlayer $player
-     */
-    public function quit($player)
-    {
-    }
-
-    /**
-     * @param FieldPlayer $e
-     * @param Telegram $t
-     *
-     * @return bool
-     */
-    public function onMessage($e, Telegram $t)
-    {
-        return false;
     }
 }

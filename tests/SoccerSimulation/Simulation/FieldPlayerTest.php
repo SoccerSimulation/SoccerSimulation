@@ -23,7 +23,7 @@ class FieldPlayerTest extends \PHPUnit_Framework_TestCase
         $opponent = new SoccerTeam($pitch->getRedGoal(), $pitch->getBlueGoal(), $pitch, 'Red');
         $team->SetOpponent($opponent);
 
-        $this->fieldPlayer = $factory->create($team, 0, PlayerBase::PLAYER_ROLE_ATTACKER);
+        $this->fieldPlayer = $factory->create($team, 0, FieldPlayer::PLAYER_ROLE_ATTACKER);
     }
 
     public function testIsInHotRegion()

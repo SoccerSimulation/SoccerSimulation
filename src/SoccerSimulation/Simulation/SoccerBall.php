@@ -7,7 +7,6 @@ use SoccerSimulation\Common\D2\Transformation;
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\D2\Wall2D;
 use SoccerSimulation\Common\Messaging\Telegram;
-use Cunningsoft\MatchBundle\SimpleSoccer\Render\Ball;
 
 /**
  *  Desc: Class to implement a soccer ball. This class inherits from
@@ -44,14 +43,13 @@ class SoccerBall extends MovingEntity implements \JsonSerializable
      */
     public function __construct(Vector2D $pos, $ballSize, $mass, $friction, array $pitchBoundary)
     {
-        //set up the base class
-        parent::__construct($pos,
+        parent::__construct(
+            $pos,
             $ballSize,
-            new Vector2D(0, 0),
             new Vector2D(0, 1),
             $mass,
-            new Vector2D(1.0, 1.0), //scale     - unused
-            0);                  //max force - unused
+            new Vector2D(1.0, 1.0) //scale     - unused
+        );
 
         $this->friction = $friction;
         $this->pitchBoundary = $pitchBoundary;
@@ -60,9 +58,7 @@ class SoccerBall extends MovingEntity implements \JsonSerializable
     /**
      * tests to see if the ball has collided with a ball and reflects
      * the ball's velocity accordingly
-     */
-
-    /**
+     *
      * @param Wall2D[] $walls
      */
     public function testCollisionWithWalls(array $walls)
@@ -171,14 +167,6 @@ class SoccerBall extends MovingEntity implements \JsonSerializable
             //update heading
             $this->heading = Vector2D::vectorNormalize($this->velocity);
         }
-    }
-
-    /**
-     * Renders the ball
-     */
-    public function render()
-    {
-        throw new \Exception('dont call the render method anymore. instead the object itself is serialized and used');
     }
 
     //a soccer ball doesn't need to handle messages

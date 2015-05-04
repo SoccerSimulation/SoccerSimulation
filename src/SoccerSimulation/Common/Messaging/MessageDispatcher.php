@@ -2,8 +2,6 @@
 
 namespace SoccerSimulation\Common\Messaging;
 
-use SoccerSimulation\Common\Game\EntityManager;
-use SoccerSimulation\Simulation\BaseGameEntity;
 use SoccerSimulation\Simulation\MessageTypes;
 use SoccerSimulation\Simulation\PlayerBase;
 

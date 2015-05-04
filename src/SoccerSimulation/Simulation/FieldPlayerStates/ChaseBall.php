@@ -4,7 +4,6 @@ namespace SoccerSimulation\Simulation\FieldPlayerStates;
 
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\FieldPlayer;
 
@@ -72,16 +71,5 @@ class ChaseBall extends State
     public function quit($player)
     {
         $player->getSteering()->deactivateSeek();
-    }
-
-    /**
-     * @param FieldPlayer $e
-     * @param Telegram $t
-     *
-     * @return bool
-     */
-    public function onMessage($e, Telegram $t)
-    {
-        return false;
     }
 }

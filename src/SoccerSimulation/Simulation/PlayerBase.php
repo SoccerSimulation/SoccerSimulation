@@ -3,6 +3,7 @@
 namespace SoccerSimulation\Simulation;
 
 use SoccerSimulation\Common\D2\C2DMatrix;
+use SoccerSimulation\Common\D2\Distance;
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\Event\EventGenerator;
 use SoccerSimulation\Common\FSM\StateMachine;
@@ -20,10 +21,7 @@ use SoccerSimulation\Common\Misc\AutoList;
 abstract class PlayerBase extends MovingEntity implements Nameable
 {
     use EventGenerator;
-
-    const PLAYER_ROLE_GOALKEEPER = 'goalkeeper';
-    const PLAYER_ROLE_DEFENDER = 'defender';
-    const PLAYER_ROLE_ATTACKER = 'attacker';
+    use Distance;
 
     /**
      * @var StateMachine
@@ -31,11 +29,6 @@ abstract class PlayerBase extends MovingEntity implements Nameable
      * an instance of the state machine class
      */
     protected $stateMachine;
-
-    /**
-     * @var string
-     */
-    protected $role;
 
     /**
      * @var SoccerTeam
@@ -92,42 +85,50 @@ abstract class PlayerBase extends MovingEntity implements Nameable
     protected $maxTurnRate;
 
     /**
+     * @var float
+     *
+     * the maximum force this entity can produce to power itself
+     * (think rockets and thrust)
+     */
+    protected $maxForce;
+
+    /**
      * @param SoccerTeam $homeTeam
      * @param int $homeRegion
-     * @param Vector2D $heading
-     * @param Vector2D $velocity
      * @param float $mass
      * @param float $maxForce
      * @param float $maxSpeedWithBall
      * @param float $maxSpeedWithoutBall
-     * @param string $role
      */
     public function __construct(
         SoccerTeam $homeTeam,
         $homeRegion,
-        Vector2D $heading,
-        Vector2D $velocity,
         $mass,
         $maxForce,
         $maxSpeedWithBall,
-        $maxSpeedWithoutBall,
-        $role
+        $maxSpeedWithoutBall
     ) {
         $scale = Prm::PlayerScale;
-        parent::__construct($homeTeam->getPitch()->getRegionFromIndex($homeRegion)->getCenter(), $scale * 5.0,
-            $velocity, $heading, $mass, new Vector2D($scale, $scale), $maxForce);
+        parent::__construct(
+            $homeTeam->getPitch()->getRegionFromIndex($homeRegion)->getCenter(),
+            $scale * 5.0,
+            new Vector2D(0, -1),
+            $mass,
+            new Vector2D($scale, $scale)
+        );
         $this->team = $homeTeam;
         $this->distanceToBallSquared = null; // @todo needs to be maxFloat
         $this->homeRegion = $homeRegion;
         $this->defaultRegion = $homeRegion;
-        $this->role = $role;
         $this->boundingRadius = 5;
         $this->maxSpeedWithBall = $maxSpeedWithBall;
         $this->maxSpeedWithoutBall = $maxSpeedWithoutBall;
         $this->maxTurnRate = Prm::PlayerMaxTurnRate;
+        $this->maxForce = $maxForce;
 
         //set up the steering behavior class
         $this->steering = new SteeringBehaviors($this, $this->getBall());
+        $this->steering->activateSeparation();
 
         //a player's start target is its start position (because it's just waiting)
         $this->steering->setTarget($homeTeam->getPitch()->getRegionFromIndex($homeRegion)->getCenter());
@@ -145,25 +146,23 @@ abstract class PlayerBase extends MovingEntity implements Nameable
     /**
      *  returns true if there is an opponent within this player's
      *  comfort zone
+     *
+     * @return bool
      */
     public function isThreatened()
     {
         /** @var PlayerBase[] $members */
-        $members = $this->getTeam()->getOpponent()->getMembers();
+        $members = $this->getTeam()->getOpponent()->getPlayers();
         //check against all opponents to make sure non are within this
         //player's comfort zone
         foreach ($members as $currentOpponent) {
             //calculate distance to the player. if dist is less than our
             //comfort zone, and the opponent is infront of the player, return true
-            if ($this->isPositionInFrontOfPlayer($currentOpponent->getPosition()) && (Vector2D::vectorDistanceSquared($this->getPosition(),
-                        $currentOpponent->getPosition()) < Prm::PlayerComfortZoneSq())
-            ) {
+            if ($this->isPositionInFrontOfPlayer($currentOpponent->getPosition()) && $this->distanceTo($currentOpponent->getPosition()) < Prm::PlayerComfortZoneSq()) {
                 return true;
             }
 
         }
-
-        // next opp
 
         return false;
     }
@@ -227,47 +226,39 @@ abstract class PlayerBase extends MovingEntity implements Nameable
     }
 
     /**
-     * @return true if the ball can be grabbed by the goalkeeper
+     * @return bool
      */
     public function isBallWithinKeeperRange()
     {
-        return Vector2D::vectorDistanceSquared($this->getPosition(),
-            $this->getBall()->getPosition()) < Prm::KeeperInBallRangeSq();
+        return $this->distanceTo($this->getBall()->getPosition()) < Prm::KeeperInBallRange;
     }
 
     /**
-     * @return true if the ball is within kicking range
+     * @return bool
      */
     public function isBallWithinKickingRange()
     {
-        return Vector2D::vectorDistanceSquared($this->getBall()->getPosition(),
-            $this->getPosition()) < Prm::PlayerKickingDistanceSq();
+        return $this->distanceTo($this->getBall()->getPosition()) < Prm::PlayerKickingDistance();
     }
 
     /**
-     * @return true if a ball comes within range of a receiver
+     * @return bool
      */
     public function isBallWithinReceivingRange()
     {
-        return Vector2D::vectorDistanceSquared($this->getPosition(),
-            $this->getBall()->getPosition()) < Prm::BallWithinReceivingRangeSq();
+        return $this->distanceTo($this->getBall()->getPosition()) < Prm::BallWithinReceivingRange;
     }
 
     /**
-     * @return true if the player is located within the boundaries
-     *        of his home region
+     * @return bool
      */
     public function isInHomeRegion()
     {
-        if ($this->role == PlayerBase::PLAYER_ROLE_GOALKEEPER) {
-            return $this->getPitch()
-                ->getRegionFromIndex($this->homeRegion)
-                ->isInside($this->getPosition(), Region::REGION_MODIFIER_NORMAL);
-        } else {
-            return $this->getPitch()
-                ->getRegionFromIndex($this->homeRegion)
-                ->isInside($this->getPosition(), Region::REGION_MODIFIER_HALFSIZE);
-        }
+        $homeRegion = $this->getPitch()->getRegionFromIndex($this->homeRegion);
+
+        $regionModifier = $this->isGoalkeeper() ? Region::REGION_MODIFIER_HALFSIZE : Region::REGION_MODIFIER_NORMAL;
+
+        return $homeRegion->isInside($this->getPosition(), $regionModifier);
     }
 
     /**
@@ -291,12 +282,11 @@ abstract class PlayerBase extends MovingEntity implements Nameable
      */
     public function isAtTarget()
     {
-        return Vector2D::vectorDistanceSquared($this->getPosition(),
-            $this->getSteering()->getTarget()) < Prm::PlayerInTargetRangeSq();
+        return $this->distanceTo($this->steering->getTarget()) < Prm::PlayerInTargetRange;
     }
 
     /**
-     * @return true if the player is the closest player in his team to the ball
+     * @return bool
      */
     public function isClosestTeamMemberToBall()
     {
@@ -349,11 +339,6 @@ abstract class PlayerBase extends MovingEntity implements Nameable
     public function isInHotRegion()
     {
         return abs($this->getPosition()->x - $this->getTeam()->getOpponentsGoal()->getCenter()->x) < $this->getPitch()->getPlayingArea()->getLength() / 3.0;
-    }
-
-    public function getRole()
-    {
-        return $this->role;
     }
 
     public function getDistanceToBallSquared()
@@ -453,11 +438,6 @@ abstract class PlayerBase extends MovingEntity implements Nameable
         $this->debugMessages = array();
     }
 
-    public function render()
-    {
-        throw new \Exception('dont use render method');
-    }
-
     /**
      * @param Vector2D $target
      *
@@ -498,9 +478,6 @@ abstract class PlayerBase extends MovingEntity implements Nameable
         $RotationMatrix->rotate($angle * $this->heading->sign($toTarget));
         $RotationMatrix->transformVector2Ds($this->heading);
         $RotationMatrix->transformVector2Ds($this->velocity);
-
-        //finally recreate m_vSide
-        $this->side = $this->heading->getPerpendicular();
 
         return false;
     }
@@ -573,4 +550,17 @@ abstract class PlayerBase extends MovingEntity implements Nameable
     {
         return $this->stateMachine;
     }
+
+    /**
+     * @return float
+     */
+    public function getMaxForce()
+    {
+        return $this->maxForce;
+    }
+
+    /**
+     * @return bool
+     */
+    abstract public function isGoalkeeper();
 }

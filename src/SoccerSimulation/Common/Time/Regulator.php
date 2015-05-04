@@ -38,7 +38,7 @@ class Regulator
     private static $UpdatePeriodVariator = 10.0;
 
     /**
-     * @return true if the current time exceeds m_dwNextUpdateTime
+     * @return bool
      */
     public function isReady()
     {

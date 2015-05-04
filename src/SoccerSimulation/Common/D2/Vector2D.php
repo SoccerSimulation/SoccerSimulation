@@ -170,7 +170,7 @@ class Vector2D
      *
      * calculates the euclidean distance between two vectors
      */
-    public function Distance(Vector2D $v2)
+    public function distanceTo(Vector2D $v2)
     {
         $ySeparation = $v2->y - $this->y;
         $xSeparation = $v2->x - $this->x;

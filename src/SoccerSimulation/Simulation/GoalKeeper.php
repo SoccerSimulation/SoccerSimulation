@@ -3,10 +3,10 @@
 namespace SoccerSimulation\Simulation;
 
 use SoccerSimulation\Common\D2\Vector2D;
-use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\FSM\StateMachine;
 use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\GoalKeeperStates\GlobalKeeperState;
+use SoccerSimulation\Simulation\GoalKeeperStates\TendGoal;
 
 /**
  * Desc:   class to implement a goalkeeper agent
@@ -25,9 +25,6 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
     public function __construct(
         SoccerTeam $homeTeam,
         $homeRegion,
-        State $startState,
-        Vector2D $heading,
-        Vector2D $velocity,
         $mass,
         $maxForce,
         $maxSpeedWithBall,
@@ -35,18 +32,15 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
     ) {
         parent::__construct($homeTeam,
             $homeRegion,
-            $heading,
-            $velocity,
             $mass,
             $maxForce,
             $maxSpeedWithBall,
-            $maxSpeedWithoutBall,
-            PlayerBase::PLAYER_ROLE_GOALKEEPER);
+            $maxSpeedWithoutBall);
 
         $this->lookAt = new Vector2D();
 
         //set up the state machine
-        $this->stateMachine = new StateMachine($this, $startState, $startState, GlobalKeeperState::getInstance());
+        $this->stateMachine = new StateMachine($this, TendGoal::getInstance(), TendGoal::getInstance(), GlobalKeeperState::getInstance());
         $this->stateMachine->getCurrentState()->enter($this);
     }
 
@@ -76,7 +70,6 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
         //update the heading if the player has a non zero velocity
         if (!$this->velocity->isZero()) {
             $this->heading = Vector2D::vectorNormalize($this->velocity);
-            $this->side = $this->heading->getPerpendicular();
         }
 
         //look-at vector always points toward the ball
@@ -141,5 +134,13 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
     public function getStateMachine()
     {
         return $this->stateMachine;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGoalkeeper()
+    {
+        return true;
     }
 }

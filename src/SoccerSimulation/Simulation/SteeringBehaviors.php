@@ -140,7 +140,6 @@ class SteeringBehaviors
     }
 
     /**
-     *
      * this calculates a force repelling from the other neighbors
      */
     private function separation()
@@ -328,7 +327,7 @@ class SteeringBehaviors
      */
     public function getSideComponent()
     {
-        return $this->player->getSide()->dot($this->steeringForce) * $this->player->getMaxTurnRate();
+        return $this->player->getHeading()->getPerpendicular()->dot($this->steeringForce) * $this->player->getMaxTurnRate();
     }
 
     public function getForce()

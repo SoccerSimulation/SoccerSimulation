@@ -5,7 +5,6 @@ namespace SoccerSimulation\Simulation\GoalKeeperStates;
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
-use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\GoalKeeper;
 use SoccerSimulation\Simulation\MessageTypes;
 use SoccerSimulation\Simulation\PlayerBase;
@@ -78,23 +77,5 @@ class PutBallBackInPlay extends State
         }
 
         $keeper->setVelocity(new Vector2D());
-    }
-
-    /**
-     * @param GoalKeeper $keeper
-     */
-    public function quit($keeper)
-    {
-    }
-
-    /**
-     * @param GoalKeeper $e
-     * @param Telegram $t
-     *
-     * @return bool
-     */
-    public function onMessage($e, Telegram $t)
-    {
-        return false;
     }
 }

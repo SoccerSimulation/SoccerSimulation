@@ -5,7 +5,6 @@ namespace SoccerSimulation\Simulation\FieldPlayerStates;
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\FieldPlayer;
 use SoccerSimulation\Simulation\Prm;
@@ -101,16 +100,5 @@ class ReceiveBall extends State
         $player->getSteering()->deactivatePursuit();
 
         $player->getTeam()->resetReceiver();
-    }
-
-    /**
-     * @param FieldPlayer $e
-     * @param Telegram $t
-     *
-     * @return bool
-     */
-    public function onMessage($e, Telegram $t)
-    {
-        return false;
     }
 }

@@ -61,7 +61,10 @@ class Goal implements \JsonSerializable
     /**
      * Given the current ball position and the previous ball position,
      * this method returns true if the ball has crossed the goal line
-     * and increments m_iNumGoalsScored
+     *
+     * @param SoccerBall $ball
+     *
+     * @return bool
      */
     public function hasScored(SoccerBall $ball)
     {
@@ -74,6 +77,11 @@ class Goal implements \JsonSerializable
         }
 
         return false;
+    }
+
+    public function incrementGoalsScored()
+    {
+        $this->numberOfGoalsScored++;
     }
 
     /**

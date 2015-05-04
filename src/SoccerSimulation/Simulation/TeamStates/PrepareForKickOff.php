@@ -3,7 +3,6 @@
 namespace SoccerSimulation\Simulation\TeamStates;
 
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\SoccerTeam;
 
 class PrepareForKickOff extends State
@@ -56,16 +55,5 @@ class PrepareForKickOff extends State
     public function quit($team)
     {
         $team->getPitch()->setGameIsActive();
-    }
-
-    /**
-     * @param mixed $e
-     * @param Telegram $t
-     *
-     * @return bool
-     */
-    public function onMessage($e, Telegram $t)
-    {
-        return false;
     }
 }

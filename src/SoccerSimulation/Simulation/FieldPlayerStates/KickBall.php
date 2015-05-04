@@ -9,7 +9,6 @@ use SoccerSimulation\Common\FSM\PassEvent;
 use SoccerSimulation\Common\FSM\ShotEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
-use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\FieldPlayer;
 use SoccerSimulation\Simulation\MessageTypes;
@@ -180,23 +179,5 @@ class KickBall extends State
         $player->getStateMachine()->changeState(Wait::getInstance());
 
         $player->findSupport();
-    }
-
-    /**
-     * @param FieldPlayer $player
-     */
-    public function quit($player)
-    {
-    }
-
-    /**
-     * @param FieldPlayer $e
-     * @param Telegram $t
-     *
-     * @return bool
-     */
-    public function onMessage($e, Telegram $t)
-    {
-        return false;
     }
 }

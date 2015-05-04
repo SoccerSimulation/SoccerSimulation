@@ -4,7 +4,6 @@ namespace SoccerSimulation\Simulation\TeamStates;
 
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\SoccerTeam;
 
@@ -43,7 +42,7 @@ class Defending extends State
         $redRegions = array(80, 75, 74, 72, 71, 59, 61, 57, 52, 44, 46);
 
         //set up the player's home regions
-        if ($team->Color() == SoccerTeam::COLOR_BLUE) {
+        if ($team->getColor() == SoccerTeam::COLOR_BLUE) {
             TeamStates::changePlayerHomeRegions($team, $blueRegions);
         } else {
             TeamStates::changePlayerHomeRegions($team, $redRegions);
@@ -66,14 +65,4 @@ class Defending extends State
             return;
         }
     }
-
-    public function quit($team)
-    {
-    }
-
-    public function onMessage($e, Telegram $t)
-    {
-        return false;
-    }
 }
-

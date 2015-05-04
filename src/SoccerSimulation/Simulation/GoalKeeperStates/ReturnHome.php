@@ -3,7 +3,6 @@
 namespace SoccerSimulation\Simulation\GoalKeeperStates;
 
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\GoalKeeper;
 
 /**
@@ -63,16 +62,5 @@ class ReturnHome extends State
     public function quit($keeper)
     {
         $keeper->getSteering()->deactivateArrive();
-    }
-
-    /**
-     * @param GoalKeeper $e
-     * @param Telegram $t
-     *
-     * @return bool
-     */
-    public function onMessage($e, Telegram $t)
-    {
-        return false;
     }
 }

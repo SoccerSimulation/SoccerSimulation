@@ -4,7 +4,6 @@ namespace SoccerSimulation\Simulation\GoalKeeperStates;
 
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\GoalKeeper;
 
@@ -79,16 +78,5 @@ class InterceptBall extends State
     public function quit($keeper)
     {
         $keeper->getSteering()->deactivatePursuit();
-    }
-
-    /**
-     * @param GoalKeeper $e
-     * @param Telegram $t
-     *
-     * @return bool
-     */
-    public function onMessage($e, Telegram $t)
-    {
-        return false;
     }
 }

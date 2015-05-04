@@ -3,7 +3,6 @@
 namespace SoccerSimulation\Simulation\GoalKeeperStates;
 
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Simulation\GoalKeeper;
 use SoccerSimulation\Simulation\Prm;
 
@@ -92,10 +91,5 @@ class TendGoal extends State
     public function quit($keeper)
     {
         $keeper->getSteering()->deactivateInterpose();
-    }
-
-    public function onMessage($e, Telegram $t)
-    {
-        return false;
     }
 }

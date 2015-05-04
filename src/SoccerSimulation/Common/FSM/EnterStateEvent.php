@@ -2,7 +2,6 @@
 
 namespace SoccerSimulation\Common\FSM;
 
-use SoccerSimulation\Simulation\BaseGameEntity;
 use SoccerSimulation\Simulation\Nameable;
 use Symfony\Component\EventDispatcher\Event;
 

@@ -9,6 +9,7 @@ use SoccerSimulation\Common\FSM\StateMachine;
 use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Common\Time\Regulator;
 use SoccerSimulation\Simulation\FieldPlayerStates\GlobalPlayerState;
+use SoccerSimulation\Simulation\FieldPlayerStates\Wait;
 
 /**
  *   Desc:   Derived from a PlayerBase, this class encapsulates a player
@@ -17,6 +18,9 @@ use SoccerSimulation\Simulation\FieldPlayerStates\GlobalPlayerState;
  */
 class FieldPlayer extends PlayerBase implements \JsonSerializable
 {
+    const PLAYER_ROLE_DEFENDER = 'defender';
+    const PLAYER_ROLE_ATTACKER = 'attacker';
+
     /**
      * @var Regulator
      *
@@ -25,11 +29,13 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
     private $kickLimiter;
 
     /**
+     * @var string
+     */
+    private $role;
+
+    /**
      * @param SoccerTeam $homeTeam
      * @param int $homeRegion
-     * @param State $startState
-     * @param Vector2D $heading
-     * @param Vector2D $velocity
      * @param float $mass
      * @param float $maxForce
      * @param float $maxSpeedWithBall
@@ -39,9 +45,6 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
     public function __construct(
         SoccerTeam $homeTeam,
         $homeRegion,
-        State $startState,
-        Vector2D $heading,
-        Vector2D $velocity,
         $mass,
         $maxForce,
         $maxSpeedWithBall,
@@ -50,22 +53,16 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
     ) {
         parent::__construct($homeTeam,
             $homeRegion,
-            $heading,
-            $velocity,
             $mass,
             $maxForce,
             $maxSpeedWithBall,
-            $maxSpeedWithoutBall,
-            $role);
+            $maxSpeedWithoutBall);
+
+        $this->role = $role;
 
         //set up the state machine
-        $this->stateMachine = new StateMachine($this, $startState, $startState, GlobalPlayerState::getInstance());
-
-        if ($startState != null) {
-            $this->stateMachine->getCurrentState()->enter($this);
-        }
-
-        $this->steering->activateSeparation();
+        $this->stateMachine = new StateMachine($this, Wait::getInstance(), Wait::getInstance(), GlobalPlayerState::getInstance());
+        $this->stateMachine->getCurrentState()->enter($this);
 
         //set up the kick regulator
         $this->kickLimiter = new Regulator(Prm::PlayerKickFrequency);
@@ -107,9 +104,6 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
         //the heading vector
         $this->velocity = Vector2D::staticMul($this->heading, $this->velocity->getLength());
 
-        //and recreate m_vSide
-        $this->side = $this->heading->getPerpendicular();
-
         //now to calculate the acceleration due to the force exerted by
         //the forward component of the steering force in the direction
         //of the player's heading
@@ -135,8 +129,27 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
         return $this->stateMachine->handleMessage($message);
     }
 
+    /**
+     * @return bool
+     */
     public function isReadyForNextKick()
     {
         return $this->kickLimiter->isReady();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGoalkeeper()
+    {
+        return false;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRole()
+    {
+        return $this->role;
     }
 }

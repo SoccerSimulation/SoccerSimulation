@@ -55,7 +55,7 @@ class SupportSpotCalculator
 
         for ($x = 0; $x < ($numX / 2) - 1; ++$x) {
             for ($y = 0; $y < $numY; ++$y) {
-                if ($this->m_pTeam->Color() == SoccerTeam::COLOR_BLUE) {
+                if ($this->m_pTeam->getColor() == SoccerTeam::COLOR_BLUE) {
                     $this->m_Spots[] = new SupportSpot(new Vector2D($left + $x * $SliceX, $top + $y * $SliceY), 0.0);
                 } else {
                     $this->m_Spots[] = new SupportSpot(new Vector2D($right - $x * $SliceX, $top + $y * $SliceY), 0.0);

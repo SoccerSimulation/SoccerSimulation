@@ -31,27 +31,6 @@ class GlobalKeeperState extends State
 
     /**
      * @param GoalKeeper $keeper
-     */
-    public function enter($keeper)
-    {
-    }
-
-    /**
-     * @param GoalKeeper $keeper
-     */
-    public function execute($keeper)
-    {
-    }
-
-    /**
-     * @param GoalKeeper $keeper
-     */
-    public function quit($keeper)
-    {
-    }
-
-    /**
-     * @param GoalKeeper $keeper
      * @param Telegram $telegram
      *
      * @return bool
@@ -59,18 +38,14 @@ class GlobalKeeperState extends State
     public function onMessage($keeper, Telegram $telegram)
     {
         switch ($telegram->message->messageType) {
-            case MessageTypes::Msg_GoHome: {
+            case MessageTypes::Msg_GoHome:
                 $keeper->setDefaultHomeRegion();
                 $keeper->getStateMachine()->changeState(ReturnHome::getInstance());
-            }
+                return true;
 
-                break;
-
-            case MessageTypes::Msg_ReceiveBall: {
+            case MessageTypes::Msg_ReceiveBall:
                 $keeper->getStateMachine()->changeState(InterceptBall::getInstance());
-            }
-
-                break;
+                return true;
 
         }
 
