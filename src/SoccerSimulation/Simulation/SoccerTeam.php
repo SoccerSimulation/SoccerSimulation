@@ -44,11 +44,14 @@ class SoccerTeam implements \JsonSerializable, Nameable
     private $color;
 
     /**
-     * @var PlayerBase[]
-     *
-     * pointers to the team members
+     * @var Goalkeeper
      */
-    private $players = array();
+    private $goalkeeper;
+
+    /**
+     * @var FieldPlayer[]
+     */
+    private $fieldPlayers = [];
 
     /**
      * @var SoccerPitch
@@ -110,6 +113,14 @@ class SoccerTeam implements \JsonSerializable, Nameable
     private $debugMessages = array();
 
     /**
+     * @return PlayerBase[]
+     */
+    public function getPlayers()
+    {
+        return array_merge([$this->goalkeeper], $this->fieldPlayers);
+    }
+
+    /**
      * called each frame. Sets m_pClosestPlayerToBall to point to the player
      * closest to the ball.
      */
@@ -117,7 +128,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
     {
         $ClosestSoFar = null;
 
-        foreach ($this->players as $cur)
+        foreach ($this->getPlayers() as $cur)
         {
             //calculate the dist. Use the squared value to avoid sqrt
             $dist = Vector2D::vectorDistanceSquared($cur->getPosition(), $this->getPitch()->getBall()->getPosition());
@@ -155,7 +166,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
         //create the players and goalkeeper
         $this->createPlayers();
 
-        foreach ($this->players as $player)
+        foreach ($this->getPlayers() as $player)
         {
             $player->getSteering()->activateSeparation();
         }
@@ -172,39 +183,8 @@ class SoccerTeam implements \JsonSerializable, Nameable
         $fieldPlayerFactory = new FieldPlayerFactory();
         $goalKeeperFactory = new GoalKeeperFactory();
 
-        if ($this->Color() == self::COLOR_RED)
-        {
-            $this->players[] = $goalKeeperFactory->create($this, 80);
-            $this->players[] = $fieldPlayerFactory->create($this, 75, PlayerBase::PLAYER_ROLE_DEFENDER); // LV
-            $this->players[] = $fieldPlayerFactory->create($this, 74, PlayerBase::PLAYER_ROLE_DEFENDER); // RV
-            $this->players[] = $fieldPlayerFactory->create($this, 72, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
-            $this->players[] = $fieldPlayerFactory->create($this, 71, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
-            $this->players[] = $fieldPlayerFactory->create($this, 59, PlayerBase::PLAYER_ROLE_DEFENDER); // DM
-            $this->players[] = $fieldPlayerFactory->create($this, 61, PlayerBase::PLAYER_ROLE_ATTACKER); // LM
-            $this->players[] = $fieldPlayerFactory->create($this, 57, PlayerBase::PLAYER_ROLE_ATTACKER); // RM
-            $this->players[] = $fieldPlayerFactory->create($this, 52, PlayerBase::PLAYER_ROLE_ATTACKER); // OM
-            $this->players[] = $fieldPlayerFactory->create($this, 44, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
-            $this->players[] = $fieldPlayerFactory->create($this, 46, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
-        }
-        else
-        {
-            $this->players[] = $goalKeeperFactory->create($this, 3);
-            $this->players[] = $fieldPlayerFactory->create($this, 8, PlayerBase::PLAYER_ROLE_DEFENDER); // LV
-            $this->players[] = $fieldPlayerFactory->create($this, 9, PlayerBase::PLAYER_ROLE_DEFENDER); // RV
-            $this->players[] = $fieldPlayerFactory->create($this, 11, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
-            $this->players[] = $fieldPlayerFactory->create($this, 12, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
-            $this->players[] = $fieldPlayerFactory->create($this, 24, PlayerBase::PLAYER_ROLE_DEFENDER); // DM
-            $this->players[] = $fieldPlayerFactory->create($this, 22, PlayerBase::PLAYER_ROLE_ATTACKER); // LM
-            $this->players[] = $fieldPlayerFactory->create($this, 26, PlayerBase::PLAYER_ROLE_ATTACKER); // RM
-            $this->players[] = $fieldPlayerFactory->create($this, 31, PlayerBase::PLAYER_ROLE_ATTACKER); // OM
-            $this->players[] = $fieldPlayerFactory->create($this, 37, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
-            $this->players[] = $fieldPlayerFactory->create($this, 39, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
-        }
-
-        foreach ($this->players as $player)
-        {
-            EntityManager::getInstance()->RegisterEntity($player);
-        }
+        $this->goalkeeper = $this->Color() == self::COLOR_RED ? $goalKeeperFactory->create($this, 80) : $goalKeeperFactory->create($this, 3);
+        $this->fieldPlayers = $fieldPlayerFactory->createCompleteLineUp($this);
     }
 
     /**
@@ -224,7 +204,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
         $this->raiseMultiple($this->stateMachine->releaseEvents());
 
         //now update each player
-        foreach ($this->players as $player)
+        foreach ($this->getPlayers() as $player)
         {
             $player->update();
             $this->raiseMultiple($player->releaseEvents());
@@ -238,11 +218,11 @@ class SoccerTeam implements \JsonSerializable, Nameable
      */
     public function returnAllFieldPlayersToHome()
     {
-        foreach ($this->players as $cur)
+        foreach ($this->getPlayers() as $player)
         {
-            if ($cur->getRole() != PlayerBase::PLAYER_ROLE_GOALKEEPER)
+            if ($player->getRole() != PlayerBase::PLAYER_ROLE_GOALKEEPER)
             {
-                MessageDispatcher::getInstance()->dispatch(1, $cur->getId(), new MessageTypes(MessageTypes::Msg_GoHome), null);
+                MessageDispatcher::getInstance()->dispatch($this->goalkeeper, $player, new MessageTypes(MessageTypes::Msg_GoHome), null);
             }
         }
     }
@@ -325,7 +305,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
         $receiver = null;
         //iterate through all this player's team members and calculate which
         //one is in a position to be passed the ball
-        foreach ($this->players as $curPlyr)
+        foreach ($this->getPlayers() as $curPlyr)
         {
             //make sure the potential receiver being examined is not this player
             //and that it is further away than the minimum pass distance
@@ -538,7 +518,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
      * the controlling player. If it is possible a message is sent to the
      * controlling player to pass the ball asap.
      */
-    public function requestPass(FieldPlayer $requester)
+    public function requestPass(FieldPlayer $requestingPlayer)
     {
         //maybe put a restriction here
         if (rand(0, 10) > 1)
@@ -547,15 +527,13 @@ class SoccerTeam implements \JsonSerializable, Nameable
         }
 
         if ($this->isPassSafeFromAllOpponents($this->getControllingPlayer()->getPosition(),
-            $requester->getPosition(),
-            Prm::MaxPassingForce, $requester)
+            $requestingPlayer->getPosition(),
+            Prm::MaxPassingForce, $requestingPlayer)
         )
         {
-
             //tell the player to make the pass
             //let the receiver know a pass is coming 
-            MessageDispatcher::getInstance()->dispatch($requester->getId(), $this->getControllingPlayer()->getId(), new MessageTypes(MessageTypes::Msg_PassToMe), $requester);
-
+            MessageDispatcher::getInstance()->dispatch($requestingPlayer, $this->getControllingPlayer(), new MessageTypes(MessageTypes::Msg_PassToMe), $requestingPlayer);
         }
     }
 
@@ -568,7 +546,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
 
         $BestPlayer = null;
 
-        foreach ($this->players as $cur)
+        foreach ($this->getPlayers() as $cur)
         {
             //only attackers utilize the BestSupportingSpot
             if (($cur->getRole() == PlayerBase::PLAYER_ROLE_ATTACKER) && ($cur != $this->controllingPlayer))
@@ -595,7 +573,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
      */
     public function getMembers()
     {
-        return $this->players;
+        return $this->getPlayers();
     }
 
     /**
@@ -716,11 +694,6 @@ class SoccerTeam implements \JsonSerializable, Nameable
         $this->controllingPlayer = null;
     }
 
-    public function setPlayerHomeRegion($plyr, $region)
-    {
-        $this->players[$plyr]->setHomeRegion($region);
-    }
-
     public function determineBestSupportingPosition()
     {
         $this->supportSpotCalculator->DetermineBestSupportingPosition();
@@ -728,7 +701,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
 
     public function updateTargetsOfWaitingPlayers()
     {
-        foreach ($this->players as $cur)
+        foreach ($this->getPlayers() as $cur)
         {
             if ($cur->getRole() != PlayerBase::PLAYER_ROLE_GOALKEEPER)
             {
@@ -751,7 +724,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
      */
     public function allPlayersAtHome()
     {
-        foreach ($this->players as $it)
+        foreach ($this->getPlayers() as $it)
         {
             if ($it->isInHomeRegion() == false)
             {
@@ -781,7 +754,7 @@ class SoccerTeam implements \JsonSerializable, Nameable
     public function jsonSerialize()
     {
         return [
-            'players' => $this->players,
+            'players' => $this->getPlayers(),
             'inControl' => $this->isInControl(),
             'state' => $this->stateMachine->getNameOfCurrentState(),
             'supportSpots' => $this->supportSpotCalculator->getSupportSpots(),

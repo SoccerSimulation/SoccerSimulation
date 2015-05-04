@@ -5,6 +5,7 @@ namespace SoccerSimulation\Common\Messaging;
 use SoccerSimulation\Common\Game\EntityManager;
 use SoccerSimulation\Simulation\BaseGameEntity;
 use SoccerSimulation\Simulation\MessageTypes;
+use SoccerSimulation\Simulation\PlayerBase;
 
 /**
  * Desc:   A message dispatcher. Manages messages of the type Telegram.
@@ -34,25 +35,17 @@ class MessageDispatcher
      * routes the message to the correct agent (if no delay) or stores
      * in the message queue to be dispatched at the correct time
      *
-     * @param mixed $sender
-     * @param mixed $receiver
+     * @param PlayerBase $sender
+     * @param PlayerBase $receiver
      * @param MessageTypes $message
      * @param mixed $additionalInfo
      */
-    public function dispatch($sender, $receiver, MessageTypes $message, $additionalInfo = null)
+    public function dispatch(PlayerBase $sender, PlayerBase $receiver, MessageTypes $message, $additionalInfo = null)
     {
-        //get a pointer to the receiver
-        $pReceiver = EntityManager::getInstance()->getEntityFromId($receiver);
-
-        //make sure the receiver is valid
-        if ($pReceiver == null) {
-            return;
-        }
-
         //create the telegram
-        $telegram = new Telegram($sender, $receiver, $message, $additionalInfo);
+        $telegram = new Telegram($sender->getId(), $receiver->getId(), $message, $additionalInfo);
 
         //send the telegram to the recipient
-        $pReceiver->handleMessage($telegram);
+        $receiver->handleMessage($telegram);
     }
 }

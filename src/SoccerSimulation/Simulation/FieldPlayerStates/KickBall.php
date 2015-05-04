@@ -165,13 +165,8 @@ class KickBall extends State
             $this->raise(new PassEvent($player, $r));
         }
 
-
         //let the receiver know a pass is coming
-        MessageDispatcher::getInstance()->dispatch($player->getId(),
-                $r->getId(),
-                new MessageTypes(MessageTypes::Msg_ReceiveBall),
-                $ballTarget);
-
+        MessageDispatcher::getInstance()->dispatch($player, $r, new MessageTypes(MessageTypes::Msg_ReceiveBall), $ballTarget);
 
         //the player should wait at his current position unless instruced
         //otherwise

@@ -48,7 +48,8 @@ class Telegram
         $this->extraInfo = $info;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return "Sender: " . $this->sender . "   Receiver: " . $this->receiver . "   Msg: " . $this->message;
     }
 }

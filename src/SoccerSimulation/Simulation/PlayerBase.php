@@ -193,7 +193,7 @@ abstract class PlayerBase extends MovingEntity implements Nameable
         {
             $bestSupportPlayer = $this->getTeam()->determineBestSupportingAttacker();
             $this->getTeam()->setSupportingPlayer($bestSupportPlayer);
-            MessageDispatcher::getInstance()->dispatch($this->getId(), $this->getTeam()->getSupportingPlayer()->getId(), new MessageTypes(MessageTypes::Msg_SupportAttacker), null);
+            MessageDispatcher::getInstance()->dispatch($this, $this->getTeam()->getSupportingPlayer(), new MessageTypes(MessageTypes::Msg_SupportAttacker), null);
         }
 
         $bestSupportPlayer = $this->getTeam()->determineBestSupportingAttacker();
@@ -206,12 +206,12 @@ abstract class PlayerBase extends MovingEntity implements Nameable
 
             if ($this->getTeam()->getSupportingPlayer() != null)
             {
-                MessageDispatcher::getInstance()->dispatch($this->getId(), $this->getTeam()->getSupportingPlayer()->getId(), new MessageTypes(MessageTypes::Msg_GoHome), null);
+                MessageDispatcher::getInstance()->dispatch($this, $this->getTeam()->getSupportingPlayer(), new MessageTypes(MessageTypes::Msg_GoHome), null);
             }
 
             $this->getTeam()->setSupportingPlayer($bestSupportPlayer);
 
-            MessageDispatcher::getInstance()->dispatch($this->getId(), $this->getTeam()->getSupportingPlayer()->getId(), new MessageTypes(MessageTypes::Msg_SupportAttacker), null);
+            MessageDispatcher::getInstance()->dispatch($this, $this->getTeam()->getSupportingPlayer(), new MessageTypes(MessageTypes::Msg_SupportAttacker), null);
         }
     }
 

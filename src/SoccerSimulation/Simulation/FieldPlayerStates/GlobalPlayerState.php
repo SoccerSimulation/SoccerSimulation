@@ -108,30 +108,30 @@ class GlobalPlayerState extends State
 
             case MessageTypes::Msg_PassToMe: {
                 //get the position of the player requesting the pass
-                /** @var FieldPlayer $receiver */
-                $receiver = $telegram->extraInfo;
+                /** @var FieldPlayer $receivingPlayer */
+                $receivingPlayer = $telegram->extraInfo;
 
                 //if the ball is not within kicking range or their is already a
                 //receiving player, this player cannot pass the ball to the player
                 //making the request.
                 if ($player->getTeam()->getReceiver() != null || !$player->isBallWithinKickingRange()) {
                     if (Define::PLAYER_STATE_INFO_ON) {
-                        $this->raise(new MessagePassToMeEvent($player, $receiver, false));
+                        $this->raise(new MessagePassToMeEvent($player, $receivingPlayer, false));
                     }
 
                     return true;
                 }
 
                 //make the pass   
-                $player->getBall()->kick(Vector2D::staticSub($receiver->getPosition(), $player->getBall()->getPosition()), Prm::MaxPassingForce);
+                $player->getBall()->kick(Vector2D::staticSub($receivingPlayer->getPosition(), $player->getBall()->getPosition()), Prm::MaxPassingForce);
 
 
                 if (Define::PLAYER_STATE_INFO_ON) {
-                    $this->raise(new MessagePassToMeEvent($player, $receiver, true));
+                    $this->raise(new MessagePassToMeEvent($player, $receivingPlayer, true));
                 }
 
                 //let the receiver know a pass is coming 
-                MessageDispatcher::getInstance()->dispatch($player->getId(), $receiver->getId(), new MessageTypes(MessageTypes::Msg_ReceiveBall), $receiver->getPosition());
+                MessageDispatcher::getInstance()->dispatch($player, $receivingPlayer, new MessageTypes(MessageTypes::Msg_ReceiveBall), $receivingPlayer->getPosition());
 
                 //change state   
                 $player->getStateMachine()->changeState(Wait::getInstance());

@@ -9,9 +9,11 @@ use SoccerSimulation\Simulation\SoccerTeam;
  */
 class TeamStates {
 
-    public static function changePlayerHomeRegions(SoccerTeam $team, array $NewRegions) {
-        for ($plyr = 0; $plyr < count($NewRegions); ++$plyr) {
-            $team->setPlayerHomeRegion($plyr, $NewRegions[$plyr]);
+    public static function changePlayerHomeRegions(SoccerTeam $team, array $NewRegions)
+    {
+        $index = 0;
+        foreach ($team->getPlayers() as $player) {
+            $player->setHomeRegion($NewRegions[$index++]);
         }
     }
 }

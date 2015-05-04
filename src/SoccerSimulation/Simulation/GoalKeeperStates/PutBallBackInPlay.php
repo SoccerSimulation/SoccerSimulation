@@ -46,7 +46,8 @@ class PutBallBackInPlay extends State
     /**
      * @param GoalKeeper $keeper
      */
-    public function execute($keeper) {
+    public function execute($keeper)
+    {
         $receiver = null;
         $ballTarget = new Vector2D();
 
@@ -64,10 +65,7 @@ class PutBallBackInPlay extends State
             $keeper->getPitch()->setGoalKeeperHasBall(false);
 
             //let the receiving player know the ball's comin' at him
-            MessageDispatcher::getInstance()->dispatch($keeper->getId(),
-                    $receiver->getId(),
-                    new MessageTypes(MessageTypes::Msg_ReceiveBall),
-                    $ballTarget);
+            MessageDispatcher::getInstance()->dispatch($keeper, $receiver, new MessageTypes(MessageTypes::Msg_ReceiveBall), $ballTarget);
 
             //go back to tending the goal   
             $keeper->getStateMachine()->changeState(TendGoal::getInstance());
@@ -81,7 +79,8 @@ class PutBallBackInPlay extends State
     /**
      * @param GoalKeeper $keeper
      */
-    public function quit($keeper) {
+    public function quit($keeper)
+    {
     }
 
     /**
@@ -90,7 +89,8 @@ class PutBallBackInPlay extends State
      *
      * @return bool
      */
-    public function onMessage($e, Telegram $t) {
+    public function onMessage($e, Telegram $t)
+    {
         return false;
     }
 }

@@ -13,7 +13,7 @@ class FieldPlayerTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $factory = $this->getMockBuilder('SoccerSimulation\Simulation\FieldPlayerFactory')->setMethods(['getMaxSpeedWithBall', 'getMaxSpeedWithoutBall'])->getMock();
+        $factory = $this->getMockBuilder(FieldPlayerFactory::class)->setMethods(['getMaxSpeedWithBall', 'getMaxSpeedWithoutBall'])->getMock();
         $factory->method('getMaxSpeedWithBall')->willReturn(Prm::PlayerMaxSpeedWithBallMin);
         $factory->method('getMaxSpeedWithoutBall')->willReturn(Prm::PlayerMaxSpeedWithoutBallMin);
 
