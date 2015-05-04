@@ -68,11 +68,12 @@ class SupportSpotCalculator
     }
 
     /**
-     * draws the spots to the screen as a hollow circles. The higher the 
+     * draws the spots to the screen as a hollow circles. The higher the
      * score, the bigger the circle. The best supporting spot is drawn in
      * bright green.
      */
-    public function render() {
+    public function render()
+    {
         throw new \Exception('dont use render');
     }
 
@@ -80,7 +81,8 @@ class SupportSpotCalculator
      * this method iterates through each possible spot and calculates its
      * score.
      */
-    public function DetermineBestSupportingPosition() {
+    public function DetermineBestSupportingPosition()
+    {
         //only update the spots every few frames                              
         if (!$this->m_pRegulator->isReady() && $this->m_pBestSupportingSpot != null) {
             return $this->m_pBestSupportingSpot->m_vPos;
@@ -99,14 +101,17 @@ class SupportSpotCalculator
 
             //Test 1. is it possible to make a safe pass from the ball's position 
             //to this position?
-            if ($this->m_pTeam->isPassSafeFromAllOpponents($this->m_pTeam->getControllingPlayer()->getPosition(), $curSpot->m_vPos, Prm::MaxPassingForce)) {
+            if ($this->m_pTeam->isPassSafeFromAllOpponents($this->m_pTeam->getControllingPlayer()->getPosition(),
+                $curSpot->m_vPos, Prm::MaxPassingForce)
+            ) {
                 $curSpot->m_dScore += Prm::Spot_CanPassScore;
             }
 
 
             //Test 2. Determine if a goal can be scored from this position.  
             if ($this->m_pTeam->canShoot($curSpot->m_vPos,
-                    Prm::MaxShootingForce)) {
+                Prm::MaxShootingForce)
+            ) {
                 $curSpot->m_dScore += Prm::Spot_CanScoreFromPositionScore;
             }
 
@@ -119,7 +124,7 @@ class SupportSpotCalculator
                 $OptimalDistance = 400.0;
 
                 $dist = Vector2D::Vec2DDistance($this->m_pTeam->getControllingPlayer()->getPosition(),
-                        $curSpot->m_vPos);
+                    $curSpot->m_vPos);
 
                 $temp = abs($OptimalDistance - $dist);
 
@@ -127,7 +132,7 @@ class SupportSpotCalculator
 
                     //normalize the distance and add it to the score
                     $curSpot->m_dScore += Prm::Spot_DistFromControllingPlayerScore
-                            * ($OptimalDistance - $temp) / $OptimalDistance;
+                        * ($OptimalDistance - $temp) / $OptimalDistance;
                 }
             }
 
@@ -151,7 +156,8 @@ class SupportSpotCalculator
      * calculated yet, this method calls DetermineBestSupportingPosition and
      * returns the result.
      */
-    public function GetBestSupportingSpot() {
+    public function GetBestSupportingSpot()
+    {
         if ($this->m_pBestSupportingSpot != null) {
             return $this->m_pBestSupportingSpot->m_vPos;
         } else {

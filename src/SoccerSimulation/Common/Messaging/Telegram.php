@@ -41,7 +41,8 @@ class Telegram
      * @param $msg
      * @param $info
      */
-    public function __construct($sender = -1, $receiver = -1, $msg = null, $info = null) {
+    public function __construct($sender = -1, $receiver = -1, $msg = null, $info = null)
+    {
         $this->sender = $sender;
         $this->receiver = $receiver;
         $this->message = $msg;

@@ -7,7 +7,8 @@ use SoccerSimulation\Simulation\SoccerTeam;
 /**
  * Desc: State prototypes for soccer team states
  */
-class TeamStates {
+class TeamStates
+{
 
     public static function changePlayerHomeRegions(SoccerTeam $team, array $NewRegions)
     {

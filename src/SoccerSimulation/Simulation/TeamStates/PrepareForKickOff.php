@@ -20,8 +20,7 @@ class PrepareForKickOff extends State
     //this is a singleton
     public static function getInstance()
     {
-        if (self::$instance === null)
-        {
+        if (self::$instance === null) {
             self::$instance = new PrepareForKickOff();
         }
 
@@ -46,8 +45,7 @@ class PrepareForKickOff extends State
     public function execute($team)
     {
         //if both teams in position, start the game
-        if ($team->allPlayersAtHome() && $team->getOpponent()->allPlayersAtHome())
-        {
+        if ($team->allPlayersAtHome() && $team->getOpponent()->allPlayersAtHome()) {
             $team->getStateMachine()->changeState(Defending::getInstance());
         }
     }

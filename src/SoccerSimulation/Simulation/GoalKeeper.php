@@ -22,24 +22,26 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
      */
     private $lookAt;
 
-    public function __construct(SoccerTeam $homeTeam,
+    public function __construct(
+        SoccerTeam $homeTeam,
+        $homeRegion,
+        State $startState,
+        Vector2D $heading,
+        Vector2D $velocity,
+        $mass,
+        $maxForce,
+        $maxSpeedWithBall,
+        $maxSpeedWithoutBall
+    ) {
+        parent::__construct($homeTeam,
             $homeRegion,
-            State $startState,
-            Vector2D $heading,
-            Vector2D $velocity,
+            $heading,
+            $velocity,
             $mass,
             $maxForce,
             $maxSpeedWithBall,
-            $maxSpeedWithoutBall) {
-        parent::__construct($homeTeam,
-                $homeRegion,
-                $heading,
-                $velocity,
-                $mass,
-                $maxForce,
-                $maxSpeedWithBall,
-                $maxSpeedWithoutBall,
-                PlayerBase::PLAYER_ROLE_GOALKEEPER);
+            $maxSpeedWithoutBall,
+            PlayerBase::PLAYER_ROLE_GOALKEEPER);
 
         $this->lookAt = new Vector2D();
 
@@ -49,7 +51,8 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
     }
 
     //these must be implemented
-    public function update() {
+    public function update()
+    {
         parent::update();
 
         //run the logic for the current state
@@ -78,7 +81,8 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
 
         //look-at vector always points toward the ball
         if (!$this->getPitch()->hasGoalKeeperBall()) {
-            $this->lookAt = Vector2D::vectorNormalize(Vector2D::staticSub($this->getBall()->getPosition(), $this->getPosition()));
+            $this->lookAt = Vector2D::vectorNormalize(Vector2D::staticSub($this->getBall()->getPosition(),
+                $this->getPosition()));
         }
     }
 
@@ -95,13 +99,14 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
     }
 
     /**
-     * @return true if the ball comes close enough for the keeper to 
+     * @return true if the ball comes close enough for the keeper to
      *         consider intercepting
      */
     public function isBallWithinRangeForIntercept()
     {
-        return (Vector2D::vectorDistanceSquared($this->getTeam()->getHomeGoal()->getCenter(), $this->getBall()->getPosition())
-                <= Prm::GoalKeeperInterceptRangeSquared());
+        return (Vector2D::vectorDistanceSquared($this->getTeam()->getHomeGoal()->getCenter(),
+                $this->getBall()->getPosition())
+            <= Prm::GoalKeeperInterceptRangeSquared());
     }
 
     /**
@@ -110,7 +115,7 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
     public function isTooFarFromGoalMouth()
     {
         return (Vector2D::vectorDistanceSquared($this->getPosition(), $this->getRearInterposeTarget())
-                > Prm::GoalKeeperInterceptRangeSquared());
+            > Prm::GoalKeeperInterceptRangeSquared());
     }
 
     /**
@@ -126,9 +131,9 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
     {
         $xPosTarget = $this->getTeam()->getHomeGoal()->getCenter()->x;
 
-    $yPosTarget = $this->getPitch()->getPlayingArea()->getCenter()->y
-                - Prm::GoalWidth * 0.5 + ($this->getBall()->getPosition()->y * Prm::GoalWidth)
-                / $this->getPitch()->getPlayingArea()->getHeight();
+        $yPosTarget = $this->getPitch()->getPlayingArea()->getCenter()->y
+            - Prm::GoalWidth * 0.5 + ($this->getBall()->getPosition()->y * Prm::GoalWidth)
+            / $this->getPitch()->getPlayingArea()->getHeight();
 
         return new Vector2D($xPosTarget, $yPosTarget);
     }

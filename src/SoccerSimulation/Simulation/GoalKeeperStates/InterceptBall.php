@@ -30,13 +30,15 @@ class InterceptBall extends State
         if (self::$instance === null) {
             self::$instance = new InterceptBall();
         }
+
         return self::$instance;
     }
 
     /**
      * @param GoalKeeper $keeper
      */
-    public function enter($keeper) {
+    public function enter($keeper)
+    {
         $keeper->getSteering()->activatePursuit();
 
         if (Define::GOALY_STATE_INFO_ON) {
@@ -47,12 +49,14 @@ class InterceptBall extends State
     /**
      * @param GoalKeeper $keeper
      */
-    public function execute($keeper) {
+    public function execute($keeper)
+    {
         //if the goalkeeper moves to far away from the goal he should return to his
         //home region UNLESS he is the closest player to the ball, in which case,
         //he should keep trying to intercept it.
         if ($keeper->isTooFarFromGoalMouth() && !$keeper->isClosestPlayerOnPitchToBall()) {
             $keeper->getStateMachine()->changeState(ReturnHome::getInstance());
+
             return;
         }
 
@@ -72,7 +76,8 @@ class InterceptBall extends State
     /**
      * @param GoalKeeper $keeper
      */
-    public function quit($keeper) {
+    public function quit($keeper)
+    {
         $keeper->getSteering()->deactivatePursuit();
     }
 
@@ -82,7 +87,8 @@ class InterceptBall extends State
      *
      * @return bool
      */
-    public function onMessage($e, Telegram $t) {
+    public function onMessage($e, Telegram $t)
+    {
         return false;
     }
 }

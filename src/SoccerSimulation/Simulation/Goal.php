@@ -65,8 +65,9 @@ class Goal implements \JsonSerializable
      */
     public function hasScored(SoccerBall $ball)
     {
-        if (Geometry::lineIntersection2D($ball->getPosition(), $ball->getOldPosition(), $this->leftPost, $this->rightPost))
-        {
+        if (Geometry::lineIntersection2D($ball->getPosition(), $ball->getOldPosition(), $this->leftPost,
+            $this->rightPost)
+        ) {
             ++$this->numberOfGoalsScored;
 
             return true;

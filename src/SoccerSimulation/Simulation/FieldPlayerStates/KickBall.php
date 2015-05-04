@@ -34,13 +34,15 @@ class KickBall extends State
         if (self::$instance === null) {
             self::$instance = new KickBall();
         }
+
         return self::$instance;
     }
 
     /**
      * @param FieldPlayer $player
      */
-    public function enter($player) {
+    public function enter($player)
+    {
         //let the team know this player is controlling
         $player->getTeam()->setControllingPlayer($player);
 
@@ -100,8 +102,11 @@ class KickBall extends State
         //if it is determined that the player could score a goal from this position
         //OR if he should just kick the ball anyway, the player will attempt
         //to make the shot
-        if ($player->getTeam()->canShoot($player->getBall()->getPosition(), $power, $ballTarget) || (lcg_value() < Prm::ChancePlayerAttemptsPotShot)) {
+        if ($player->getTeam()->canShoot($player->getBall()->getPosition(), $power,
+                $ballTarget) || (lcg_value() < Prm::ChancePlayerAttemptsPotShot)
+        ) {
             $this->shoot($player, $ballTarget, $power);
+
             return;
         }
 
@@ -110,6 +115,7 @@ class KickBall extends State
         $pass = $player->getTeam()->findPass($player, $ballTarget, $power, Prm::MinPassDist);
         if ($player->isThreatened() && $pass['found']) {
             $this->pass($player, $pass['receiver'], $ballTarget, $power);
+
             return;
         }
 
@@ -166,7 +172,8 @@ class KickBall extends State
         }
 
         //let the receiver know a pass is coming
-        MessageDispatcher::getInstance()->dispatch($player, $r, new MessageTypes(MessageTypes::Msg_ReceiveBall), $ballTarget);
+        MessageDispatcher::getInstance()->dispatch($player, $r, new MessageTypes(MessageTypes::Msg_ReceiveBall),
+            $ballTarget);
 
         //the player should wait at his current position unless instruced
         //otherwise

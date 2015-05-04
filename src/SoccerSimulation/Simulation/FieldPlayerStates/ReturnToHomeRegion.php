@@ -26,16 +26,19 @@ class ReturnToHomeRegion extends State
         if (self::$instance === null) {
             self::$instance = new ReturnToHomeRegion();
         }
+
         return self::$instance;
     }
 
     /**
      * @param FieldPlayer $player
      */
-    public function enter($player) {
+    public function enter($player)
+    {
         $player->getSteering()->activateArrive();
 
-        if (!$player->getHomeRegion()->isInside($player->getSteering()->getTarget(), Region::REGION_MODIFIER_HALFSIZE)) {
+        if (!$player->getHomeRegion()->isInside($player->getSteering()->getTarget(), Region::REGION_MODIFIER_HALFSIZE)
+        ) {
             $player->getSteering()->setTarget($player->getHomeRegion()->getCenter());
         }
 
@@ -47,14 +50,16 @@ class ReturnToHomeRegion extends State
     /**
      * @param FieldPlayer $player
      */
-    public function execute($player) {
+    public function execute($player)
+    {
         if ($player->getPitch()->isGameActive()) {
             //if the ball is nearer this player than any other team member  &&
             //there is not an assigned receiver && the goalkeeper does not gave
             //the ball, go chase it
             if ($player->isClosestTeamMemberToBall()
-                    && ($player->getTeam()->getReceiver() == null)
-                    && !$player->getPitch()->hasGoalKeeperBall()) {
+                && ($player->getTeam()->getReceiver() == null)
+                && !$player->getPitch()->hasGoalKeeperBall()
+            ) {
                 $player->getStateMachine()->changeState(ChaseBall::getInstance());
 
                 return;
@@ -65,24 +70,29 @@ class ReturnToHomeRegion extends State
         //player target to his current position.(so that if he gets jostled out of 
         //position he can move back to it)
         if ($player->getPitch()->isGameActive() && $player->getHomeRegion()->isInside($player->getPosition(),
-                Region::REGION_MODIFIER_HALFSIZE)) {
+                Region::REGION_MODIFIER_HALFSIZE)
+        ) {
             $player->getSteering()->setTarget($player->getPosition());
             $player->getStateMachine()->changeState(Wait::getInstance());
         } //if game is not on the player must return much closer to the center of his
         //home region
-        else if (!$player->getPitch()->isGameActive() && $player->isAtTarget()) {
-            $player->getStateMachine()->changeState(Wait::getInstance());
+        else {
+            if (!$player->getPitch()->isGameActive() && $player->isAtTarget()) {
+                $player->getStateMachine()->changeState(Wait::getInstance());
+            }
         }
     }
 
     /**
      * @param FieldPlayer $player
      */
-    public function quit($player) {
+    public function quit($player)
+    {
         $player->getSteering()->deactivateArrive();
     }
 
-    public function onMessage($e, Telegram $t) {
+    public function onMessage($e, Telegram $t)
+    {
         return false;
     }
 }

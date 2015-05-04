@@ -6,7 +6,7 @@ use SoccerSimulation\Common\Event\EventGenerator;
 use SoccerSimulation\Common\Messaging\Telegram;
 
 /**
- * State machine class. Inherit from this class and create some 
+ * State machine class. Inherit from this class and create some
  * states to give your agents FSM functionality
  */
 class StateMachine
@@ -41,8 +41,12 @@ class StateMachine
      * @param State|null $previousState
      * @param State|null $globalState
      */
-    public function __construct($owner, State $currentState = null, State $previousState = null, State $globalState = null)
-    {
+    public function __construct(
+        $owner,
+        State $currentState = null,
+        State $previousState = null,
+        State $globalState = null
+    ) {
         $this->owner = $owner;
         $this->currentState = $currentState;
         $this->previousState = $previousState;
@@ -124,14 +128,16 @@ class StateMachine
     {
         return $this->previousState;
     }
+
     //only ever used during debugging to grab the name of the current state
 
     public function getNameOfCurrentState()
     {
         $s = explode('\\', get_class($this->currentState));
-        if(count($s) > 0) {
+        if (count($s) > 0) {
             return $s[count($s) - 1];
         }
+
         return get_class($this->currentState);
     }
 }

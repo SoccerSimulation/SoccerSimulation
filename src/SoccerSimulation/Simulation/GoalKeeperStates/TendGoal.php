@@ -33,13 +33,15 @@ class TendGoal extends State
         if (self::$instance === null) {
             self::$instance = new TendGoal();
         }
+
         return self::$instance;
     }
 
     /**
      * @param GoalKeeper $keeper
      */
-    public function enter($keeper) {
+    public function enter($keeper)
+    {
         //turn interpose on
         $keeper->getSteering()->activateInterpose(Prm::GoalKeeperTendingDistance);
 
@@ -51,7 +53,8 @@ class TendGoal extends State
     /**
      * @param GoalKeeper $keeper
      */
-    public function execute($keeper) {
+    public function execute($keeper)
+    {
         //the rear interpose target will change as the ball's position changes
         //so it must be updated each update-step 
         $keeper->getSteering()->setTarget($keeper->getRearInterposeTarget());
@@ -78,6 +81,7 @@ class TendGoal extends State
         //is no threat from the opponents he should move back towards it
         if ($keeper->isTooFarFromGoalMouth() && $keeper->getTeam()->isInControl()) {
             $keeper->getStateMachine()->changeState(ReturnHome::getInstance());
+
             return;
         }
     }
@@ -85,11 +89,13 @@ class TendGoal extends State
     /**
      * @param GoalKeeper $keeper
      */
-    public function quit($keeper) {
+    public function quit($keeper)
+    {
         $keeper->getSteering()->deactivateInterpose();
     }
 
-    public function onMessage($e, Telegram $t) {
+    public function onMessage($e, Telegram $t)
+    {
         return false;
     }
 }

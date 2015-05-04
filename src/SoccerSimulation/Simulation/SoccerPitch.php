@@ -92,14 +92,18 @@ class SoccerPitch implements \JsonSerializable
         }
         $this->gameIsActive = true;
         // define the playing area
-        $this->playingArea = new Region(self::PITCH_OFFSET_WIDTH, self::PITCH_OFFSET_HEIGHT, self::PITCH_WIDTH + self::PITCH_OFFSET_WIDTH, self::PITCH_HEIGHT + self::PITCH_OFFSET_HEIGHT);
+        $this->playingArea = new Region(self::PITCH_OFFSET_WIDTH, self::PITCH_OFFSET_HEIGHT,
+            self::PITCH_WIDTH + self::PITCH_OFFSET_WIDTH, self::PITCH_HEIGHT + self::PITCH_OFFSET_HEIGHT);
 
         // create the regions
-        $this->createRegions($this->getPlayingArea()->getWidth() / self::REGIONS_HORIZONTAL, $this->getPlayingArea()->getHeight() / self::REGIONS_VERTICAL);
+        $this->createRegions($this->getPlayingArea()->getWidth() / self::REGIONS_HORIZONTAL,
+            $this->getPlayingArea()->getHeight() / self::REGIONS_VERTICAL);
 
         // create the goals
-        $this->redGoal = new Goal(new Vector2D(self::PITCH_OFFSET_WIDTH, $this->getCenterOfPitch()->y), new Vector2D(1, 0));
-        $this->blueGoal = new Goal(new Vector2D(self::PITCH_OFFSET_WIDTH + self::PITCH_WIDTH, $this->getCenterOfPitch()->y), new Vector2D(-1, 0));
+        $this->redGoal = new Goal(new Vector2D(self::PITCH_OFFSET_WIDTH, $this->getCenterOfPitch()->y),
+            new Vector2D(1, 0));
+        $this->blueGoal = new Goal(new Vector2D(self::PITCH_OFFSET_WIDTH + self::PITCH_WIDTH,
+            $this->getCenterOfPitch()->y), new Vector2D(-1, 0));
 
         // create the walls
         $topLeft = new Vector2D($this->playingArea->getLeft(), $this->playingArea->getTop());
@@ -115,7 +119,8 @@ class SoccerPitch implements \JsonSerializable
         $this->walls[] = new Wall2D($bottomRight, $bottomLeft);
 
         // create the soccer ball
-        $this->ball = new SoccerBall($this->getCenterOfPitch(), Prm::BallSize, Prm::BallMass, Prm::Friction, $this->walls);
+        $this->ball = new SoccerBall($this->getCenterOfPitch(), Prm::BallSize, Prm::BallMass, Prm::Friction,
+            $this->walls);
 
         // create the teams
         $this->redTeam = new SoccerTeam($this->redGoal, $this->blueGoal, $this, SoccerTeam::COLOR_RED);
@@ -140,7 +145,9 @@ class SoccerPitch implements \JsonSerializable
 
         for ($col = 0; $col < self::REGIONS_HORIZONTAL; ++$col) {
             for ($row = 0; $row < self::REGIONS_VERTICAL; ++$row) {
-                $this->regions[$idx] = new Region($col * $width + self::PITCH_OFFSET_WIDTH, $row * $height + self::PITCH_OFFSET_HEIGHT, ($col + 1) * $width + self::PITCH_OFFSET_WIDTH, ($row + 1) * $height + self::PITCH_OFFSET_HEIGHT, $idx);
+                $this->regions[$idx] = new Region($col * $width + self::PITCH_OFFSET_WIDTH,
+                    $row * $height + self::PITCH_OFFSET_HEIGHT, ($col + 1) * $width + self::PITCH_OFFSET_WIDTH,
+                    ($row + 1) * $height + self::PITCH_OFFSET_HEIGHT, $idx);
                 --$idx;
             }
         }
@@ -258,6 +265,7 @@ class SoccerPitch implements \JsonSerializable
      */
     public function getCenterOfPitch()
     {
-        return new Vector2D(self::PITCH_WIDTH / 2 + self::PITCH_OFFSET_WIDTH, self::PITCH_HEIGHT / 2 + self::PITCH_OFFSET_HEIGHT);
+        return new Vector2D(self::PITCH_WIDTH / 2 + self::PITCH_OFFSET_WIDTH,
+            self::PITCH_HEIGHT / 2 + self::PITCH_OFFSET_HEIGHT);
     }
 }

@@ -24,8 +24,7 @@ class Dribble extends State
     //this is a singleton
     public static function getInstance()
     {
-        if (self::$instance === null)
-        {
+        if (self::$instance === null) {
             self::$instance = new Dribble();
         }
 
@@ -40,8 +39,7 @@ class Dribble extends State
         //let the team know this player is controlling
         $player->getTeam()->setControllingPlayer($player);
 
-        if (Define::PLAYER_STATE_INFO_ON)
-        {
+        if (Define::PLAYER_STATE_INFO_ON) {
             $this->raise(new EnterStateEvent($this, $player));
         }
     }
@@ -56,8 +54,7 @@ class Dribble extends State
         //if the ball is between the player and the home goal, it needs to swivel
         // the ball around by doing multiple small kicks and turns until the player 
         //is facing in the correct direction
-        if ($dot < 0)
-        {
+        if ($dot < 0) {
             //the player's heading is going to be rotated by a small amount (Pi/4) 
             //and then the ball will be kicked in that direction
             $direction = $player->getHeading();
@@ -75,8 +72,7 @@ class Dribble extends State
 
             $player->getBall()->kick($direction, $kickingForce);
         } //kick the ball down the field
-        else
-        {
+        else {
             $player->getBall()->kick($player->getTeam()->getHomeGoal()->getFacing(), Prm::MaxDribbleForce);
         }
 

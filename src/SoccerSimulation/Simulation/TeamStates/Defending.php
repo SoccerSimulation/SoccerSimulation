@@ -25,13 +25,15 @@ class Defending extends State
         if (self::$instance === null) {
             self::$instance = new Defending();
         }
+
         return self::$instance;
     }
 
     /**
      * @param SoccerTeam $team
      */
-    public function enter($team) {
+    public function enter($team)
+    {
         if (Define::DEBUG_TEAM_STATES) {
             $this->raise(new EnterStateEvent($this, $team));
         }
@@ -55,18 +57,22 @@ class Defending extends State
     /**
      * @param SoccerTeam $team
      */
-    public function execute($team) {
+    public function execute($team)
+    {
         //if in control change states
         if ($team->isInControl()) {
             $team->getStateMachine()->changeState(Attacking::getInstance());
+
             return;
         }
     }
 
-    public function quit($team) {
+    public function quit($team)
+    {
     }
 
-    public function onMessage($e, Telegram $t) {
+    public function onMessage($e, Telegram $t)
+    {
         return false;
     }
 }

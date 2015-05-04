@@ -74,7 +74,8 @@ class SteeringBehaviors
     private function seek(Vector2D $target)
     {
 
-        $DesiredVelocity = Vector2D::vectorNormalize(Vector2D::staticMul(Vector2D::staticSub($target, $this->player->getPosition()), $this->player->getMaxSpeed()));
+        $DesiredVelocity = Vector2D::vectorNormalize(Vector2D::staticMul(Vector2D::staticSub($target,
+            $this->player->getPosition()), $this->player->getMaxSpeed()));
 
         return Vector2D::staticSub($DesiredVelocity, $this->player->getVelocity());
     }
@@ -90,8 +91,7 @@ class SteeringBehaviors
         //calculate the distance to the target
         $dist = $ToTarget->getLength();
 
-        if ($dist > 0)
-        {
+        if ($dist > 0) {
             //because Deceleration is enumerated as an int, this value is required
             //to provide fine tweaking of the deceleration..
             $DecelerationTweaker = 0.3;
@@ -128,8 +128,7 @@ class SteeringBehaviors
         //and the pursuer; 
         $LookAheadTime = 0.0;
 
-        if ($ball->getSpeed() != 0.0)
-        {
+        if ($ball->getSpeed() != 0.0) {
             $LookAheadTime = $ToBall->getLength() / $ball->getSpeed();
         }
 
@@ -151,12 +150,10 @@ class SteeringBehaviors
 
         /** @var PlayerBase[] $AllPlayers */
         $AllPlayers = (new AutoList())->GetAllMembers();
-        foreach ($AllPlayers as $curPlyr)
-        {
+        foreach ($AllPlayers as $curPlyr) {
             //make sure this agent isn't included in the calculations and that
             //the agent is close enough
-            if (($curPlyr != $this->player) && $curPlyr->getSteering()->isTagged())
-            {
+            if (($curPlyr != $this->player) && $curPlyr->getSteering()->isTagged()) {
                 $ToAgent = Vector2D::staticSub($this->player->getPosition(), $curPlyr->getPosition());
 
                 //scale the force inversely proportional to the agents distance  
@@ -172,12 +169,14 @@ class SteeringBehaviors
      * Given an opponent and an object position this method returns a
      * force that attempts to position the agent between them
      */
-    private function interpose(SoccerBall $ball,
+    private function interpose(
+        SoccerBall $ball,
         Vector2D $target,
-        $DistFromTarget)
-    {
-        return $this->arrive(Vector2D::staticAdd($target, Vector2D::staticMul(Vector2D::vectorNormalize(Vector2D::staticSub($ball->getPosition(), $target)),
-            $DistFromTarget)), self::DECELERATION_NORMAL);
+        $DistFromTarget
+    ) {
+        return $this->arrive(Vector2D::staticAdd($target,
+            Vector2D::staticMul(Vector2D::vectorNormalize(Vector2D::staticSub($ball->getPosition(), $target)),
+                $DistFromTarget)), self::DECELERATION_NORMAL);
     }
 
     /**
@@ -187,16 +186,14 @@ class SteeringBehaviors
     {
         /** @var PlayerBase[] $AllPlayers */
         $AllPlayers = (new AutoList())->GetAllMembers();
-        foreach ($AllPlayers as $curPlyr)
-        {
+        foreach ($AllPlayers as $curPlyr) {
             //first clear any current tag
             $curPlyr->getSteering()->unTag();
 
             //work in distance squared to avoid sqrts
             $to = Vector2D::staticSub($curPlyr->getPosition(), $this->player->getPosition());
 
-            if ($to->LengthSq() < ($this->viewDistance * $this->viewDistance))
-            {
+            if ($to->LengthSq() < ($this->viewDistance * $this->viewDistance)) {
                 $curPlyr->getSteering()->tag();
             }
         }
@@ -224,8 +221,7 @@ class SteeringBehaviors
         $magnitudeRemaining = $this->player->getMaxForce() - $MagnitudeSoFar;
 
         //return false if there is no more force left to use
-        if ($magnitudeRemaining <= 0.0)
-        {
+        if ($magnitudeRemaining <= 0.0) {
             return false;
         }
 
@@ -233,8 +229,7 @@ class SteeringBehaviors
         $MagnitudeToAdd = $ForceToAdd->getLength();
 
         //now calculate how much of the force we can really add  
-        if ($MagnitudeToAdd > $magnitudeRemaining)
-        {
+        if ($MagnitudeToAdd > $magnitudeRemaining) {
             $MagnitudeToAdd = $magnitudeRemaining;
         }
 
@@ -257,52 +252,42 @@ class SteeringBehaviors
         //the soccer players must always tag their neighbors
         $this->findNeighbours();
 
-        if ($this->isActive(self::FLAG_SEPARATION))
-        {
+        if ($this->isActive(self::FLAG_SEPARATION)) {
             $force->add(Vector2D::staticMul($this->separation(), $this->multiplierSeparation));
 
-            if (!$this->accumulateForce($this->steeringForce, $force))
-            {
+            if (!$this->accumulateForce($this->steeringForce, $force)) {
                 return $this->steeringForce;
             }
         }
 
-        if ($this->isActive(self::FLAG_SEEK))
-        {
+        if ($this->isActive(self::FLAG_SEEK)) {
             $force->add($this->seek($this->target));
 
-            if (!$this->accumulateForce($this->steeringForce, $force))
-            {
+            if (!$this->accumulateForce($this->steeringForce, $force)) {
                 return $this->steeringForce;
             }
         }
 
-        if ($this->isActive(self::FLAG_ARRIVE))
-        {
+        if ($this->isActive(self::FLAG_ARRIVE)) {
             $force->add($this->arrive($this->target, self::DECELERATION_FAST));
 
-            if (!$this->accumulateForce($this->steeringForce, $force))
-            {
+            if (!$this->accumulateForce($this->steeringForce, $force)) {
                 return $this->steeringForce;
             }
         }
 
-        if ($this->isActive(self::FLAG_PURSUIT))
-        {
+        if ($this->isActive(self::FLAG_PURSUIT)) {
             $force->add($this->pursuit($this->ball));
 
-            if (!$this->accumulateForce($this->steeringForce, $force))
-            {
+            if (!$this->accumulateForce($this->steeringForce, $force)) {
                 return $this->steeringForce;
             }
         }
 
-        if ($this->isActive(self::FLAG_INTERPOSE))
-        {
+        if ($this->isActive(self::FLAG_INTERPOSE)) {
             $force->add($this->interpose($this->ball, $this->target, $this->interposeDistance));
 
-            if (!$this->accumulateForce($this->steeringForce, $force))
-            {
+            if (!$this->accumulateForce($this->steeringForce, $force)) {
                 return $this->steeringForce;
             }
         }

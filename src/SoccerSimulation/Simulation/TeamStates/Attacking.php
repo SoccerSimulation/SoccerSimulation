@@ -25,13 +25,15 @@ class Attacking extends State
         if (self::$instance === null) {
             self::$instance = new Attacking();
         }
+
         return self::$instance;
     }
 
     /**
      * @param SoccerTeam $team
      */
-    public function enter($team) {
+    public function enter($team)
+    {
         if (Define::DEBUG_TEAM_STATES) {
             $this->raise(new EnterStateEvent($this, $team));
         }
@@ -56,10 +58,12 @@ class Attacking extends State
     /**
      * @param SoccerTeam $team
      */
-    public function execute($team) {
+    public function execute($team)
+    {
         //if this team is no longer in control change states
         if (!$team->isInControl()) {
             $team->getStateMachine()->changeState(Defending::getInstance());
+
             return;
         }
 
@@ -70,7 +74,8 @@ class Attacking extends State
     /**
      * @param SoccerTeam $team
      */
-    public function quit($team) {
+    public function quit($team)
+    {
         //there is no supporting player for defense
         $team->resetSupportingPlayer();
     }
@@ -81,7 +86,8 @@ class Attacking extends State
      *
      * @return bool
      */
-    public function onMessage($e, Telegram $t) {
+    public function onMessage($e, Telegram $t)
+    {
         return false;
     }
 }

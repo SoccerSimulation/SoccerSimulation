@@ -30,13 +30,15 @@ class GlobalPlayerState extends State
         if (self::$instance === null) {
             self::$instance = new GlobalPlayerState();
         }
+
         return self::$instance;
     }
 
     /**
      * @param FieldPlayer $player
      */
-    public function enter($player) {
+    public function enter($player)
+    {
     }
 
     /**
@@ -49,7 +51,8 @@ class GlobalPlayerState extends State
     /**
      * @param FieldPlayer $player
      */
-    public function quit($player) {
+    public function quit($player)
+    {
     }
 
     /**
@@ -58,7 +61,8 @@ class GlobalPlayerState extends State
      *
      * @return bool
      */
-    public function onMessage($player, Telegram $telegram) {
+    public function onMessage($player, Telegram $telegram)
+    {
         switch ($telegram->message->messageType) {
             case MessageTypes::Msg_ReceiveBall: {
                 //set the target
@@ -94,7 +98,7 @@ class GlobalPlayerState extends State
 
                 return true;
             }
-           // break;
+            // break;
 
             case MessageTypes::Msg_GoHome: {
                 $player->setDefaultHomeRegion();
@@ -123,7 +127,8 @@ class GlobalPlayerState extends State
                 }
 
                 //make the pass   
-                $player->getBall()->kick(Vector2D::staticSub($receivingPlayer->getPosition(), $player->getBall()->getPosition()), Prm::MaxPassingForce);
+                $player->getBall()->kick(Vector2D::staticSub($receivingPlayer->getPosition(),
+                    $player->getBall()->getPosition()), Prm::MaxPassingForce);
 
 
                 if (Define::PLAYER_STATE_INFO_ON) {
@@ -131,7 +136,8 @@ class GlobalPlayerState extends State
                 }
 
                 //let the receiver know a pass is coming 
-                MessageDispatcher::getInstance()->dispatch($player, $receivingPlayer, new MessageTypes(MessageTypes::Msg_ReceiveBall), $receivingPlayer->getPosition());
+                MessageDispatcher::getInstance()->dispatch($player, $receivingPlayer,
+                    new MessageTypes(MessageTypes::Msg_ReceiveBall), $receivingPlayer->getPosition());
 
                 //change state   
                 $player->getStateMachine()->changeState(Wait::getInstance());

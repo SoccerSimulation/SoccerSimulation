@@ -14,11 +14,13 @@ class Transformation
     //  given a std::vector of 2D vectors, a position, orientation and scale,
     //  this function transforms the 2D vectors into the object's world space
     //------------------------------------------------------------------------
-    public static function WorldTransform(array $points,
-            Vector2D $pos,
-            Vector2D $forward,
-            Vector2D $side,
-            Vector2D $scale = null) {
+    public static function WorldTransform(
+        array $points,
+        Vector2D $pos,
+        Vector2D $forward,
+        Vector2D $side,
+        Vector2D $scale = null
+    ) {
         //copy the original vertices into the buffer about to be transformed
         $TranVector2Ds = array();
         foreach ($points as $point) {
@@ -49,10 +51,12 @@ class Transformation
 //
 //  Transforms a point from the agent's local space into world space
 //------------------------------------------------------------------------
-    public static function PointToWorldSpace(Vector2D $point,
-            Vector2D $AgentHeading,
-            Vector2D $AgentSide,
-            Vector2D $AgentPosition) {
+    public static function PointToWorldSpace(
+        Vector2D $point,
+        Vector2D $AgentHeading,
+        Vector2D $AgentSide,
+        Vector2D $AgentPosition
+    ) {
         //make a copy of the point
         $TransPoint = Vector2D::createByVector2D($point);
 
@@ -75,9 +79,11 @@ class Transformation
 //
 //  Transforms a vector from the agent's local space into world space
 //------------------------------------------------------------------------
-    public static function VectorToWorldSpace(Vector2D $vec,
-            Vector2D $AgentHeading,
-            Vector2D $AgentSide) {
+    public static function VectorToWorldSpace(
+        Vector2D $vec,
+        Vector2D $AgentHeading,
+        Vector2D $AgentSide
+    ) {
         //make a copy of the point
         $TransVec = Vector2D::createByVector2D($vec);
 
@@ -96,10 +102,12 @@ class Transformation
 //--------------------- PointToLocalSpace --------------------------------
 //
 //------------------------------------------------------------------------
-    public static function PointToLocalSpace(Vector2D $point,
-            Vector2D $AgentHeading,
-            Vector2D $AgentSide,
-            Vector2D $AgentPosition) {
+    public static function PointToLocalSpace(
+        Vector2D $point,
+        Vector2D $AgentHeading,
+        Vector2D $AgentSide,
+        Vector2D $AgentPosition
+    ) {
 
         //make a copy of the point
         $TransPoint = Vector2D::createByVector2D($point);
@@ -127,9 +135,11 @@ class Transformation
 //--------------------- VectorToLocalSpace --------------------------------
 //
 //------------------------------------------------------------------------
-    public static function VectorToLocalSpace(Vector2D $vec,
-            Vector2D $AgentHeading,
-            Vector2D $AgentSide) {
+    public static function VectorToLocalSpace(
+        Vector2D $vec,
+        Vector2D $AgentHeading,
+        Vector2D $AgentSide
+    ) {
 
         //make a copy of the point
         $TransPoint = Vector2D::createByVector2D($vec);
@@ -153,7 +163,8 @@ class Transformation
 //
 //  rotates a vector ang rads around the origin
 //-----------------------------------------------------------------------------
-    public static function vectorRotateAroundOrigin(Vector2D $v, $ang) {
+    public static function vectorRotateAroundOrigin(Vector2D $v, $ang)
+    {
         //create a transformation matrix
         $mat = new C2DMatrix();
 
@@ -172,13 +183,15 @@ class Transformation
 //  of whiskers radiating away from the origin and with equal distance between
 //  them. (like the spokes of a wheel clipped to a specific segment size)
 //----------------------------------------------------------------------------
-    public static function CreateWhiskers($NumWhiskers,
+    public static function CreateWhiskers(
+        $NumWhiskers,
         $WhiskerLength,
         $fov,
-            Vector2D $facing,
-            Vector2D $origin) {
+        Vector2D $facing,
+        Vector2D $origin
+    ) {
         //this is the magnitude of the angle separating each whisker
-        $SectorSize = $fov / (double) ($NumWhiskers - 1);
+        $SectorSize = $fov / (double)($NumWhiskers - 1);
 
         $whiskers = array();
         $angle = -$fov * 0.5;

@@ -36,25 +36,27 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
      * @param float $maxSpeedWithoutBall
      * @param string $role
      */
-    public function __construct(SoccerTeam $homeTeam,
+    public function __construct(
+        SoccerTeam $homeTeam,
+        $homeRegion,
+        State $startState,
+        Vector2D $heading,
+        Vector2D $velocity,
+        $mass,
+        $maxForce,
+        $maxSpeedWithBall,
+        $maxSpeedWithoutBall,
+        $role
+    ) {
+        parent::__construct($homeTeam,
             $homeRegion,
-            State $startState,
-            Vector2D $heading,
-            Vector2D $velocity,
+            $heading,
+            $velocity,
             $mass,
             $maxForce,
             $maxSpeedWithBall,
             $maxSpeedWithoutBall,
-            $role) {
-        parent::__construct($homeTeam,
-                $homeRegion,
-                $heading,
-                $velocity,
-                $mass,
-                $maxForce,
-                $maxSpeedWithBall,
-                $maxSpeedWithoutBall,
-                $role);
+            $role);
 
         //set up the state machine
         $this->stateMachine = new StateMachine($this, $startState, $startState, GlobalPlayerState::getInstance());
@@ -104,14 +106,14 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
         //make sure the velocity vector points in the same direction as
         //the heading vector
         $this->velocity = Vector2D::staticMul($this->heading, $this->velocity->getLength());
-        
+
         //and recreate m_vSide
         $this->side = $this->heading->getPerpendicular();
 
         //now to calculate the acceleration due to the force exerted by
         //the forward component of the steering force in the direction
         //of the player's heading
-        $accel = Vector2D::staticMul($this->heading, $this->steering->getForwardComponent()/ $this->mass);
+        $accel = Vector2D::staticMul($this->heading, $this->steering->getForwardComponent() / $this->mass);
 
         $this->velocity->add($accel);
 

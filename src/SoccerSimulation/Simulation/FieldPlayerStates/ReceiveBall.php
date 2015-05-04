@@ -27,13 +27,15 @@ class ReceiveBall extends State
         if (self::$instance === null) {
             self::$instance = new ReceiveBall();
         }
+
         return self::$instance;
     }
 
     /**
      * @param FieldPlayer $player
      */
-    public function enter($player) {
+    public function enter($player)
+    {
         //let the team know this player is receiving the ball
         $player->getTeam()->setReceiver($player);
 
@@ -51,7 +53,9 @@ class ReceiveBall extends State
         $PassThreatRadius = 70.0;
 
         // @todo change player::isInHotRegion() to player::isInPenaltyBox
-        if (($player->isInHotRegion() || lcg_value() < Prm::ChanceOfUsingArriveTypeReceiveBehavior) && !$player->getTeam()->isOpponentWithinRadius($player->getPosition(), $PassThreatRadius)) {
+        if (($player->isInHotRegion() || lcg_value() < Prm::ChanceOfUsingArriveTypeReceiveBehavior) && !$player->getTeam()->isOpponentWithinRadius($player->getPosition(),
+                $PassThreatRadius)
+        ) {
             $player->getSteering()->activateArrive();
         } else {
             $player->getSteering()->activatePursuit();
@@ -64,7 +68,8 @@ class ReceiveBall extends State
     /**
      * @param FieldPlayer $player
      */
-    public function execute($player) {
+    public function execute($player)
+    {
         //if the ball comes close enough to the player or if his team lose control
         //he should change state to chase the ball
         if ($player->isBallWithinReceivingRange() || !$player->getTeam()->isInControl()) {
@@ -90,7 +95,8 @@ class ReceiveBall extends State
     /**
      * @param FieldPlayer $player
      */
-    public function quit($player) {
+    public function quit($player)
+    {
         $player->getSteering()->deactivateArrive();
         $player->getSteering()->deactivatePursuit();
 
@@ -103,7 +109,8 @@ class ReceiveBall extends State
      *
      * @return bool
      */
-    public function onMessage($e, Telegram $t) {
+    public function onMessage($e, Telegram $t)
+    {
         return false;
     }
 }

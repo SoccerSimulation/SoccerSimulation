@@ -102,10 +102,20 @@ abstract class PlayerBase extends MovingEntity implements Nameable
      * @param float $maxSpeedWithoutBall
      * @param string $role
      */
-    public function __construct(SoccerTeam $homeTeam, $homeRegion, Vector2D $heading, Vector2D $velocity, $mass, $maxForce, $maxSpeedWithBall, $maxSpeedWithoutBall, $role)
-    {
+    public function __construct(
+        SoccerTeam $homeTeam,
+        $homeRegion,
+        Vector2D $heading,
+        Vector2D $velocity,
+        $mass,
+        $maxForce,
+        $maxSpeedWithBall,
+        $maxSpeedWithoutBall,
+        $role
+    ) {
         $scale = Prm::PlayerScale;
-        parent::__construct($homeTeam->getPitch()->getRegionFromIndex($homeRegion)->getCenter(), $scale * 5.0, $velocity, $heading, $mass, new Vector2D($scale, $scale), $maxForce);
+        parent::__construct($homeTeam->getPitch()->getRegionFromIndex($homeRegion)->getCenter(), $scale * 5.0,
+            $velocity, $heading, $mass, new Vector2D($scale, $scale), $maxForce);
         $this->team = $homeTeam;
         $this->distanceToBallSquared = null; // @todo needs to be maxFloat
         $this->homeRegion = $homeRegion;
@@ -142,12 +152,12 @@ abstract class PlayerBase extends MovingEntity implements Nameable
         $members = $this->getTeam()->getOpponent()->getMembers();
         //check against all opponents to make sure non are within this
         //player's comfort zone
-        foreach ($members as $currentOpponent)
-        {
+        foreach ($members as $currentOpponent) {
             //calculate distance to the player. if dist is less than our
             //comfort zone, and the opponent is infront of the player, return true
-            if ($this->isPositionInFrontOfPlayer($currentOpponent->getPosition()) && (Vector2D::vectorDistanceSquared($this->getPosition(), $currentOpponent->getPosition()) < Prm::PlayerComfortZoneSq()))
-            {
+            if ($this->isPositionInFrontOfPlayer($currentOpponent->getPosition()) && (Vector2D::vectorDistanceSquared($this->getPosition(),
+                        $currentOpponent->getPosition()) < Prm::PlayerComfortZoneSq())
+            ) {
                 return true;
             }
 
@@ -179,7 +189,8 @@ abstract class PlayerBase extends MovingEntity implements Nameable
      */
     public function trackTarget()
     {
-        $this->setHeading(Vector2D::vectorNormalize(Vector2D::staticSub($this->getSteering()->getTarget(), $this->getPosition())));
+        $this->setHeading(Vector2D::vectorNormalize(Vector2D::staticSub($this->getSteering()->getTarget(),
+            $this->getPosition())));
     }
 
     /**
@@ -189,11 +200,11 @@ abstract class PlayerBase extends MovingEntity implements Nameable
     public function findSupport()
     {
         //if there is no support we need to find a suitable player.
-        if ($this->getTeam()->getSupportingPlayer() == null)
-        {
+        if ($this->getTeam()->getSupportingPlayer() == null) {
             $bestSupportPlayer = $this->getTeam()->determineBestSupportingAttacker();
             $this->getTeam()->setSupportingPlayer($bestSupportPlayer);
-            MessageDispatcher::getInstance()->dispatch($this, $this->getTeam()->getSupportingPlayer(), new MessageTypes(MessageTypes::Msg_SupportAttacker), null);
+            MessageDispatcher::getInstance()->dispatch($this, $this->getTeam()->getSupportingPlayer(),
+                new MessageTypes(MessageTypes::Msg_SupportAttacker), null);
         }
 
         $bestSupportPlayer = $this->getTeam()->determineBestSupportingAttacker();
@@ -201,17 +212,17 @@ abstract class PlayerBase extends MovingEntity implements Nameable
         //if the best player available to support the attacker changes, update
         //the pointers and send messages to the relevant players to update their
         //states
-        if ($bestSupportPlayer != null && ($bestSupportPlayer != $this->getTeam()->getSupportingPlayer()))
-        {
+        if ($bestSupportPlayer != null && ($bestSupportPlayer != $this->getTeam()->getSupportingPlayer())) {
 
-            if ($this->getTeam()->getSupportingPlayer() != null)
-            {
-                MessageDispatcher::getInstance()->dispatch($this, $this->getTeam()->getSupportingPlayer(), new MessageTypes(MessageTypes::Msg_GoHome), null);
+            if ($this->getTeam()->getSupportingPlayer() != null) {
+                MessageDispatcher::getInstance()->dispatch($this, $this->getTeam()->getSupportingPlayer(),
+                    new MessageTypes(MessageTypes::Msg_GoHome), null);
             }
 
             $this->getTeam()->setSupportingPlayer($bestSupportPlayer);
 
-            MessageDispatcher::getInstance()->dispatch($this, $this->getTeam()->getSupportingPlayer(), new MessageTypes(MessageTypes::Msg_SupportAttacker), null);
+            MessageDispatcher::getInstance()->dispatch($this, $this->getTeam()->getSupportingPlayer(),
+                new MessageTypes(MessageTypes::Msg_SupportAttacker), null);
         }
     }
 
@@ -220,7 +231,8 @@ abstract class PlayerBase extends MovingEntity implements Nameable
      */
     public function isBallWithinKeeperRange()
     {
-        return Vector2D::vectorDistanceSquared($this->getPosition(), $this->getBall()->getPosition()) < Prm::KeeperInBallRangeSq();
+        return Vector2D::vectorDistanceSquared($this->getPosition(),
+            $this->getBall()->getPosition()) < Prm::KeeperInBallRangeSq();
     }
 
     /**
@@ -228,7 +240,8 @@ abstract class PlayerBase extends MovingEntity implements Nameable
      */
     public function isBallWithinKickingRange()
     {
-        return Vector2D::vectorDistanceSquared($this->getBall()->getPosition(), $this->getPosition()) < Prm::PlayerKickingDistanceSq();
+        return Vector2D::vectorDistanceSquared($this->getBall()->getPosition(),
+            $this->getPosition()) < Prm::PlayerKickingDistanceSq();
     }
 
     /**
@@ -236,7 +249,8 @@ abstract class PlayerBase extends MovingEntity implements Nameable
      */
     public function isBallWithinReceivingRange()
     {
-        return Vector2D::vectorDistanceSquared($this->getPosition(), $this->getBall()->getPosition()) < Prm::BallWithinReceivingRangeSq();
+        return Vector2D::vectorDistanceSquared($this->getPosition(),
+            $this->getBall()->getPosition()) < Prm::BallWithinReceivingRangeSq();
     }
 
     /**
@@ -245,14 +259,11 @@ abstract class PlayerBase extends MovingEntity implements Nameable
      */
     public function isInHomeRegion()
     {
-        if ($this->role == PlayerBase::PLAYER_ROLE_GOALKEEPER)
-        {
+        if ($this->role == PlayerBase::PLAYER_ROLE_GOALKEEPER) {
             return $this->getPitch()
                 ->getRegionFromIndex($this->homeRegion)
                 ->isInside($this->getPosition(), Region::REGION_MODIFIER_NORMAL);
-        }
-        else
-        {
+        } else {
             return $this->getPitch()
                 ->getRegionFromIndex($this->homeRegion)
                 ->isInside($this->getPosition(), Region::REGION_MODIFIER_HALFSIZE);
@@ -280,7 +291,8 @@ abstract class PlayerBase extends MovingEntity implements Nameable
      */
     public function isAtTarget()
     {
-        return Vector2D::vectorDistanceSquared($this->getPosition(), $this->getSteering()->getTarget()) < Prm::PlayerInTargetRangeSq();
+        return Vector2D::vectorDistanceSquared($this->getPosition(),
+            $this->getSteering()->getTarget()) < Prm::PlayerInTargetRangeSq();
     }
 
     /**
@@ -468,14 +480,12 @@ abstract class PlayerBase extends MovingEntity implements Nameable
         }
 
         //return true if the player is facing the target
-        if ($angle < 0.00001)
-        {
+        if ($angle < 0.00001) {
             return true;
         }
 
         //clamp the amount to turn to the max turn rate
-        if ($angle > $this->maxTurnRate)
-        {
+        if ($angle > $this->maxTurnRate) {
             $angle = $this->maxTurnRate;
         }
 
@@ -547,7 +557,8 @@ abstract class PlayerBase extends MovingEntity implements Nameable
             'position' => $this->position,
             'heading' => $this->heading,
             'target' => $this->steering->getTarget(),
-            'steeringForce' => Vector2D::staticAdd($this->position, Vector2D::staticMul($this->steering->getForce(), 50)),
+            'steeringForce' => Vector2D::staticAdd($this->position,
+                Vector2D::staticMul($this->steering->getForce(), 50)),
             'state' => $this->stateMachine->getNameOfCurrentState(),
             'threatened' => $this->isControllingPlayer() && $this->isThreatened(),
             'isInHotRegion' => $this->isInHotRegion(),

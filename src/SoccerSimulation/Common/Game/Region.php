@@ -75,52 +75,62 @@ class Region implements \JsonSerializable
      * returns true if the given position lays inside the region. The
      * region modifier can be used to contract the region bounderies
      */
-    public function isInside(Vector2D $pos, $r = self::REGION_MODIFIER_NORMAL) {
+    public function isInside(Vector2D $pos, $r = self::REGION_MODIFIER_NORMAL)
+    {
         if ($r == self::REGION_MODIFIER_NORMAL) {
             return (($pos->x > $this->left) && ($pos->x < $this->right)
-                    && ($pos->y > $this->top) && ($pos->y < $this->bottom));
+                && ($pos->y > $this->top) && ($pos->y < $this->bottom));
         } else {
             $marginX = $this->width * 0.25;
             $marginY = $this->height * 0.25;
 
             return (($pos->x > ($this->left + $marginX)) && ($pos->x < ($this->right - $marginX))
-                    && ($pos->y > ($this->top + $marginY)) && ($pos->y < ($this->bottom - $marginY)));
+                && ($pos->y > ($this->top + $marginY)) && ($pos->y < ($this->bottom - $marginY)));
         }
     }
 
-    public function getTop() {
+    public function getTop()
+    {
         return $this->top;
     }
 
-    public function getBottom() {
+    public function getBottom()
+    {
         return $this->bottom;
     }
 
-    public function getLeft() {
+    public function getLeft()
+    {
         return $this->left;
     }
 
-    public function getRight() {
+    public function getRight()
+    {
         return $this->right;
     }
 
-    public function getWidth() {
+    public function getWidth()
+    {
         return abs($this->right - $this->left);
     }
 
-    public function getHeight() {
+    public function getHeight()
+    {
         return abs($this->top - $this->bottom);
     }
 
-    public function getLength() {
+    public function getLength()
+    {
         return max($this->getWidth(), $this->getHeight());
     }
 
-    public function getCenter() {
+    public function getCenter()
+    {
         return Vector2D::createByVector2D($this->center);
     }
 
-    public function ID() {
+    public function ID()
+    {
         return $this->id;
     }
 

@@ -22,8 +22,7 @@ class ChaseBall extends State
     //this is a singleton
     public static function getInstance()
     {
-        if (self::$instance === null)
-        {
+        if (self::$instance === null) {
             self::$instance = new ChaseBall();
         }
 
@@ -37,8 +36,7 @@ class ChaseBall extends State
     {
         $player->getSteering()->activateSeek();
 
-        if (Define::PLAYER_STATE_INFO_ON)
-        {
+        if (Define::PLAYER_STATE_INFO_ON) {
             $this->raise(new EnterStateEvent($this, $player));
         }
     }
@@ -49,8 +47,7 @@ class ChaseBall extends State
     public function execute($player)
     {
         //if the ball is within kicking range the player changes state to KickBall.
-        if ($player->isBallWithinKickingRange())
-        {
+        if ($player->isBallWithinKickingRange()) {
             $player->getStateMachine()->changeState(KickBall::getInstance());
 
             return;
@@ -58,8 +55,7 @@ class ChaseBall extends State
 
         //if the player is the closest player to the ball then he should keep
         //chasing it
-        if ($player->isClosestTeamMemberToBall())
-        {
+        if ($player->isClosestTeamMemberToBall()) {
             $player->getSteering()->setTarget($player->getBall()->getPosition());
 
             return;

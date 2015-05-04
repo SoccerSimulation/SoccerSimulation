@@ -38,8 +38,7 @@ class FieldPlayerFactory extends PlayerBaseFactory
     public function createCompleteLineUp(SoccerTeam $team)
     {
         $players = [];
-        if ($team->Color() == SoccerTeam::COLOR_RED)
-        {
+        if ($team->Color() == SoccerTeam::COLOR_RED) {
             $players[] = $this->create($team, 75, PlayerBase::PLAYER_ROLE_DEFENDER); // LV
             $players[] = $this->create($team, 74, PlayerBase::PLAYER_ROLE_DEFENDER); // RV
             $players[] = $this->create($team, 72, PlayerBase::PLAYER_ROLE_DEFENDER); // IV
@@ -50,9 +49,7 @@ class FieldPlayerFactory extends PlayerBaseFactory
             $players[] = $this->create($team, 52, PlayerBase::PLAYER_ROLE_ATTACKER); // OM
             $players[] = $this->create($team, 44, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
             $players[] = $this->create($team, 46, PlayerBase::PLAYER_ROLE_ATTACKER); // MS
-        }
-        else
-        {
+        } else {
             $players[] = $this->create($team, 8, PlayerBase::PLAYER_ROLE_DEFENDER); // LV
             $players[] = $this->create($team, 9, PlayerBase::PLAYER_ROLE_DEFENDER); // RV
             $players[] = $this->create($team, 11, PlayerBase::PLAYER_ROLE_DEFENDER); // IV

@@ -27,6 +27,7 @@ class MessageDispatcher
         if (self::$Dispatcher === null) {
             self::$Dispatcher = new MessageDispatcher();
         }
+
         return self::$Dispatcher;
     }
 

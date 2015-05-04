@@ -8,11 +8,11 @@ use SoccerSimulation\Simulation\GoalKeeper;
 
 /**
  *
-//------------------------- ReturnHome: ----------------------------------
-//
-//  In this state the goalkeeper simply returns back to the center of
-//  the goal region before changing state back to TendGoal
-//------------------------------------------------------------------------
+ * //------------------------- ReturnHome: ----------------------------------
+ * //
+ * //  In this state the goalkeeper simply returns back to the center of
+ * //  the goal region before changing state back to TendGoal
+ * //------------------------------------------------------------------------
  */
 class ReturnHome extends State
 {
@@ -31,20 +31,23 @@ class ReturnHome extends State
         if (self::$instance === null) {
             self::$instance = new ReturnHome();
         }
+
         return self::$instance;
     }
 
     /**
      * @param GoalKeeper $keeper
      */
-    public function enter($keeper) {
+    public function enter($keeper)
+    {
         $keeper->getSteering()->activateArrive();
     }
 
     /**
      * @param GoalKeeper $keeper
      */
-    public function execute($keeper) {
+    public function execute($keeper)
+    {
         $keeper->getSteering()->setTarget($keeper->getHomeRegion()->getCenter());
 
         //if close enough to home or the opponents get control over the ball,
@@ -57,7 +60,8 @@ class ReturnHome extends State
     /**
      * @param GoalKeeper $keeper
      */
-    public function quit($keeper) {
+    public function quit($keeper)
+    {
         $keeper->getSteering()->deactivateArrive();
     }
 
@@ -67,7 +71,8 @@ class ReturnHome extends State
      *
      * @return bool
      */
-    public function onMessage($e, Telegram $t) {
+    public function onMessage($e, Telegram $t)
+    {
         return false;
     }
 }

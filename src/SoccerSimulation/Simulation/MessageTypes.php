@@ -20,11 +20,13 @@ class MessageTypes
         $this->messageType = $messageType;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return self::messageToString($this);
     }
 
-    public static function messageToString(MessageTypes $msg) {
+    public static function messageToString(MessageTypes $msg)
+    {
         switch ($msg->messageType) {
             case self::Msg_ReceiveBall:
                 return "Msg_ReceiveBall";

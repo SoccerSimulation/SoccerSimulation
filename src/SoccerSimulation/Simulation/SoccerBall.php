@@ -46,26 +46,27 @@ class SoccerBall extends MovingEntity implements \JsonSerializable
     {
         //set up the base class
         parent::__construct($pos,
-                $ballSize,
-                new Vector2D(0, 0),
-                new Vector2D(0, 1),
-                $mass,
-                new Vector2D(1.0, 1.0), //scale     - unused
-                0);                  //max force - unused
+            $ballSize,
+            new Vector2D(0, 0),
+            new Vector2D(0, 1),
+            $mass,
+            new Vector2D(1.0, 1.0), //scale     - unused
+            0);                  //max force - unused
 
         $this->friction = $friction;
         $this->pitchBoundary = $pitchBoundary;
     }
 
     /**
-     * tests to see if the ball has collided with a ball and reflects 
+     * tests to see if the ball has collided with a ball and reflects
      * the ball's velocity accordingly
      */
 
     /**
      * @param Wall2D[] $walls
      */
-    public function testCollisionWithWalls(array $walls) {
+    public function testCollisionWithWalls(array $walls)
+    {
         //test ball against each wall, find out which is closest
         $idxClosest = -1;
 
@@ -82,26 +83,30 @@ class SoccerBall extends MovingEntity implements \JsonSerializable
             //calculate the point on the ball that would hit the wall. This is 
             //simply the wall's normal(inversed) multiplied by the ball's radius
             //and added to the balls center (its position)
-            $thisCollisionPoint = Vector2D::staticSub($this->getPosition(), (Vector2D::staticMul($walls[$w]->getNormal(), $this->getBoundingRadius())));
+            $thisCollisionPoint = Vector2D::staticSub($this->getPosition(),
+                (Vector2D::staticMul($walls[$w]->getNormal(), $this->getBoundingRadius())));
 
             //calculate exactly where the collision point will hit the plane    
             if (Geometry::whereIsPoint($thisCollisionPoint,
                     $walls[$w]->getFrom(),
-                    $walls[$w]->getNormal()) == Geometry::SPAN_TYPE_PLANE_BACKSIDE) {
+                    $walls[$w]->getNormal()) == Geometry::SPAN_TYPE_PLANE_BACKSIDE
+            ) {
                 $distToWall = Geometry::distanceToRayPlaneIntersection($thisCollisionPoint,
-                        $walls[$w]->getNormal(),
-                        $walls[$w]->getFrom(),
-                        $walls[$w]->getNormal());
+                    $walls[$w]->getNormal(),
+                    $walls[$w]->getFrom(),
+                    $walls[$w]->getNormal());
 
-                $intersectionPoint = Vector2D::staticAdd($thisCollisionPoint, (Vector2D::staticMul($walls[$w]->getNormal(), $distToWall)));
+                $intersectionPoint = Vector2D::staticAdd($thisCollisionPoint,
+                    (Vector2D::staticMul($walls[$w]->getNormal(), $distToWall)));
 
             } else {
                 $distToWall = Geometry::distanceToRayPlaneIntersection($thisCollisionPoint,
-                        $velocityNormal,
-                        $walls[$w]->getFrom(),
-                        $walls[$w]->getNormal());
+                    $velocityNormal,
+                    $walls[$w]->getFrom(),
+                    $walls[$w]->getNormal());
 
-                $intersectionPoint = Vector2D::staticAdd($thisCollisionPoint, (Vector2D::staticMul($velocityNormal, $distToWall)));
+                $intersectionPoint = Vector2D::staticAdd($thisCollisionPoint,
+                    (Vector2D::staticMul($velocityNormal, $distToWall)));
             }
 
             //check to make sure the intersection point is actually on the line
@@ -109,9 +114,10 @@ class SoccerBall extends MovingEntity implements \JsonSerializable
             $onLineSegment = false;
 
             if (Geometry::lineIntersection2D($walls[$w]->getFrom(),
-                    $walls[$w]->getTo(),
-                    Vector2D::staticSub($thisCollisionPoint, Vector2D::staticMul($walls[$w]->getNormal(), 20.0)),
-                    Vector2D::staticAdd($thisCollisionPoint, Vector2D::staticMul($walls[$w]->getNormal(), 20.0)))) {
+                $walls[$w]->getTo(),
+                Vector2D::staticSub($thisCollisionPoint, Vector2D::staticMul($walls[$w]->getNormal(), 20.0)),
+                Vector2D::staticAdd($thisCollisionPoint, Vector2D::staticMul($walls[$w]->getNormal(), 20.0)))
+            ) {
 
                 $onLineSegment = true;
             }
@@ -202,7 +208,8 @@ class SoccerBall extends MovingEntity implements \JsonSerializable
      * method calculates how long it will take the ball to travel between
      * the two points
      */
-    public function getTimeToCoverDistance(Vector2D $from, Vector2D $to, $force) {
+    public function getTimeToCoverDistance(Vector2D $from, Vector2D $to, $force)
+    {
         //this will be the velocity of the ball in the next time step *if*
         //the player was to make the pass. 
         $speed = $force / $this->mass;
@@ -279,7 +286,8 @@ class SoccerBall extends MovingEntity implements \JsonSerializable
      * positions the ball at the desired location and sets the ball's velocity to
      *  zero
      */
-    public function placeAtPosition(Vector2D $position) {
+    public function placeAtPosition(Vector2D $position)
+    {
         $this->position = Vector2D::createByVector2D($position);
 
         $this->oldPosition = Vector2D::createByVector2D($this->position);
@@ -288,7 +296,7 @@ class SoccerBall extends MovingEntity implements \JsonSerializable
     }
 
     /**
-     *  this can be used to vary the accuracy of a player's kick. Just call it 
+     *  this can be used to vary the accuracy of a player's kick. Just call it
      *  prior to kicking the ball using the ball's position and the ball target as
      *  parameters.
      */

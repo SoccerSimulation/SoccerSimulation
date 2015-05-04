@@ -402,7 +402,8 @@ class Vector2D
 
 ///////////////////////////////////////////////////////////////////////////////
 //treats a window as a toroid
-    public static function WrapAround(Vector2D $pos, $MaxX, $MaxY) {
+    public static function WrapAround(Vector2D $pos, $MaxX, $MaxY)
+    {
         if ($pos->x > $MaxX) {
             $pos->x = 0.0;
         }

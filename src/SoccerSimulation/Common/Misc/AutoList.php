@@ -8,11 +8,13 @@ class AutoList
 {
     static private $m_Members = array();
 
-    public function add($o) {
+    public function add($o)
+    {
         self::$m_Members[] = $o;
     }
 
-    public function GetAllMembers() {
+    public function GetAllMembers()
+    {
         return self::$m_Members;
     }
 }

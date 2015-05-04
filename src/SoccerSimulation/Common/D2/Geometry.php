@@ -9,13 +9,15 @@ class Geometry
     const SPAN_TYPE_PLANE_ON_PLANE = 'span_type_on_plane';
 
     /**
-     * given a plane and a ray this function determins how far along the ray 
+     * given a plane and a ray this function determins how far along the ray
      * an interestion occurs. Returns negative if the ray is parallel
      */
-    public static function distanceToRayPlaneIntersection(Vector2D $RayOrigin,
-            Vector2D $RayHeading,
-            Vector2D $PlanePoint, //any point on the plane
-            Vector2D $PlaneNormal) {
+    public static function distanceToRayPlaneIntersection(
+        Vector2D $RayOrigin,
+        Vector2D $RayHeading,
+        Vector2D $PlanePoint, //any point on the plane
+        Vector2D $PlaneNormal
+    ) {
 
         $d = -$PlaneNormal->dot($PlanePoint);
         $numer = $PlaneNormal->dot($RayOrigin) + $d;
@@ -31,17 +33,21 @@ class Geometry
 
 //------------------------- WhereIsPoint --------------------------------------
 
-    public static function whereIsPoint(Vector2D $point,
-            Vector2D $PointOnPlane, //any point on the plane
-            Vector2D $PlaneNormal) {
+    public static function whereIsPoint(
+        Vector2D $point,
+        Vector2D $PointOnPlane, //any point on the plane
+        Vector2D $PlaneNormal
+    ) {
         $dir = Vector2D::staticSub($PointOnPlane, $point);
 
         $d = $dir->dot($PlaneNormal);
 
         if ($d < -0.000001) {
             return self::SPAN_TYPE_PLANE_FRONT;
-        } else if ($d > 0.000001) {
-            return self::SPAN_TYPE_PLANE_BACKSIDE;
+        } else {
+            if ($d > 0.000001) {
+                return self::SPAN_TYPE_PLANE_BACKSIDE;
+            }
         }
 
         return self::SPAN_TYPE_PLANE_ON_PLANE;
@@ -51,12 +57,13 @@ class Geometry
 
     /**
      *  Given a point P and a circle of radius R centered at C this function
-     *  determines the two points on the circle that intersect with the 
+     *  determines the two points on the circle that intersect with the
      *  tangents from P to the circle. Returns false if P is within the circle.
      *
      *  Thanks to Dave Eberly for this one.
      */
-    public static function getTangentPoints(Vector2D $C, $R, Vector2D $P, Vector2D $T1, Vector2D $T2) {
+    public static function getTangentPoints(Vector2D $C, $R, Vector2D $P, Vector2D $T1, Vector2D $T2)
+    {
         $PmC = Vector2D::staticSub($P, $C);
         $SqrLen = $PmC->LengthSq();
         $RSqr = $R * $R;
@@ -77,13 +84,15 @@ class Geometry
     }
 
     /**
-     *	Given 2 lines in 2D space AB, CD this returns true if an 
-     *	intersection occurs.
+     *    Given 2 lines in 2D space AB, CD this returns true if an
+     *    intersection occurs.
      */
-    public static function lineIntersection2D(Vector2D $A,
-            Vector2D $B,
-            Vector2D $C,
-            Vector2D $D) {
+    public static function lineIntersection2D(
+        Vector2D $A,
+        Vector2D $B,
+        Vector2D $C,
+        Vector2D $D
+    ) {
         $rTop = ($A->y - $C->y) * ($D->x - $C->x) - ($A->x - $C->x) * ($D->y - $C->y);
         $sTop = ($A->y - $C->y) * ($B->x - $A->x) - ($A->x - $C->x) * ($B->y - $A->y);
 

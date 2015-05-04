@@ -27,13 +27,15 @@ class SupportAttacker extends State
         if (self::$instance === null) {
             self::$instance = new SupportAttacker();
         }
+
         return self::$instance;
     }
 
     /**
      * @param FieldPlayer $player
      */
-    public function enter($player) {
+    public function enter($player)
+    {
         $player->getSteering()->activateArrive();
 
         $player->getSteering()->setTarget($player->getTeam()->getSupportSpot());
@@ -46,10 +48,12 @@ class SupportAttacker extends State
     /**
      * @param FieldPlayer $player
      */
-    public function execute($player) {
+    public function execute($player)
+    {
         //if his team loses control go back home
         if (!$player->getTeam()->isInControl()) {
             $player->getStateMachine()->changeState(ReturnToHomeRegion::getInstance());
+
             return;
         }
 
@@ -63,7 +67,8 @@ class SupportAttacker extends State
         //if this player has a shot at the goal AND the attacker can pass
         //the ball to him the attacker should pass the ball to this player
         if ($player->getTeam()->canShoot($player->getPosition(),
-                Prm::MaxShootingForce)) {
+            Prm::MaxShootingForce)
+        ) {
             $player->getTeam()->requestPass($player);
         }
 
@@ -88,7 +93,8 @@ class SupportAttacker extends State
     /**
      * @param FieldPlayer $player
      */
-    public function quit($player) {
+    public function quit($player)
+    {
         //set supporting player to null so that the team knows it has to 
         //determine a new one.
         $player->getTeam()->resetSupportingPlayer();
@@ -102,7 +108,8 @@ class SupportAttacker extends State
      *
      * @return bool
      */
-    public function onMessage($e, Telegram $t) {
+    public function onMessage($e, Telegram $t)
+    {
         return false;
     }
 }

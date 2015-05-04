@@ -26,6 +26,7 @@ class Wait extends State
         if (self::$instance === null) {
             self::$instance = new Wait();
         }
+
         return self::$instance;
     }
 
@@ -68,8 +69,9 @@ class Wait extends State
         //if this player's team is controlling AND this player is not the attacker
         //AND is further up the field than the attacker he should request a pass.
         if ($player->getTeam()->isInControl()
-                && (!$player->isControllingPlayer())
-                && $player->isAheadOfAttacker()) {
+            && (!$player->isControllingPlayer())
+            && $player->isAheadOfAttacker()
+        ) {
             $player->getTeam()->requestPass($player);
 
             return;
@@ -80,8 +82,9 @@ class Wait extends State
             //there is not an assigned receiver AND neither goalkeeper has
             //the ball, go chase it
             if ($player->isClosestTeamMemberToBall()
-                    && $player->getTeam()->getReceiver() == null
-                    && !$player->getPitch()->hasGoalKeeperBall()) {
+                && $player->getTeam()->getReceiver() == null
+                && !$player->getPitch()->hasGoalKeeperBall()
+            ) {
                 $player->getStateMachine()->changeState(ChaseBall::getInstance());
 
                 return;

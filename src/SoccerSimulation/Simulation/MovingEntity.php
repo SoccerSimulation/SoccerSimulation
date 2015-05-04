@@ -52,8 +52,15 @@ abstract class MovingEntity extends BaseGameEntity
      * @param Vector2D $scale
      * @param float $maxForce
      */
-    public function __construct(Vector2D $position, $radius, Vector2D $velocity, Vector2D $heading, $mass, Vector2D $scale, $maxForce)
-    {
+    public function __construct(
+        Vector2D $position,
+        $radius,
+        Vector2D $velocity,
+        Vector2D $heading,
+        $mass,
+        Vector2D $scale,
+        $maxForce
+    ) {
         parent::__construct(BaseGameEntity::getNextValidId());
         $this->heading = Vector2D::createByVector2D($heading);
         $this->velocity = Vector2D::createByVector2D($velocity);
