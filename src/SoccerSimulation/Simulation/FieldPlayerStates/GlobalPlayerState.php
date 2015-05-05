@@ -7,7 +7,6 @@ use SoccerSimulation\Common\FSM\MessagePassToMeEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
 use SoccerSimulation\Common\Messaging\Telegram;
-use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\FieldPlayer;
 use SoccerSimulation\Simulation\MessageTypes;
 use SoccerSimulation\Simulation\Prm;
@@ -73,9 +72,7 @@ class GlobalPlayerState extends State
                 //receiving player, this player cannot pass the ball to the player
                 //making the request.
                 if ($player->getTeam()->getReceiver() != null || !$player->isBallWithinKickingRange()) {
-                    if (Define::PLAYER_STATE_INFO_ON) {
-                        $this->raise(new MessagePassToMeEvent($player, $receivingPlayer, false));
-                    }
+                    $this->raise(new MessagePassToMeEvent($player, $receivingPlayer, false));
 
                     return true;
                 }
@@ -84,10 +81,7 @@ class GlobalPlayerState extends State
                 $player->getBall()->kick(Vector2D::staticSub($receivingPlayer->getPosition(),
                     $player->getBall()->getPosition()), Prm::MaxPassingForce);
 
-
-                if (Define::PLAYER_STATE_INFO_ON) {
-                    $this->raise(new MessagePassToMeEvent($player, $receivingPlayer, true));
-                }
+                $this->raise(new MessagePassToMeEvent($player, $receivingPlayer, true));
 
                 //let the receiver know a pass is coming 
                 MessageDispatcher::getInstance()->dispatch($player, $receivingPlayer,

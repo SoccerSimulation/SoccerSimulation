@@ -9,7 +9,6 @@ use SoccerSimulation\Common\FSM\PassEvent;
 use SoccerSimulation\Common\FSM\ShotEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Messaging\MessageDispatcher;
-use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\FieldPlayer;
 use SoccerSimulation\Simulation\MessageTypes;
 use SoccerSimulation\Simulation\PlayerBase;
@@ -50,10 +49,7 @@ class KickBall extends State
             $player->getStateMachine()->changeState(ChaseBall::getInstance());
         }
 
-
-        if (Define::PLAYER_STATE_INFO_ON) {
-            $this->raise(new EnterStateEvent($this, $player));
-        }
+        $this->raise(new EnterStateEvent($this, $player));
     }
 
     /**
@@ -62,27 +58,21 @@ class KickBall extends State
     public function execute($player)
     {
         if ($player->getPitch()->hasGoalKeeperBall()) {
-            if (Define::PLAYER_STATE_INFO_ON) {
-                $this->raise(new CannotKickBallEvent($player, 'goalkeeper has the ball'));
-            }
+            $this->raise(new CannotKickBallEvent($player, 'goalkeeper has the ball'));
             $player->getStateMachine()->changeState(ChaseBall::getInstance());
 
             return;
         }
 
         if ($player->getTeam()->getReceiver() != null) {
-            if (Define::PLAYER_STATE_INFO_ON) {
-                $this->raise(new CannotKickBallEvent($player, 'already defined a receiver'));
-            }
+            $this->raise(new CannotKickBallEvent($player, 'already defined a receiver'));
             $player->getStateMachine()->changeState(ChaseBall::getInstance());
 
             return;
         }
 
         if (!$player->isBallAhead()) {
-            if (Define::PLAYER_STATE_INFO_ON) {
-                $this->raise(new CannotKickBallEvent($player, 'ball is behind player'));
-            }
+            $this->raise(new CannotKickBallEvent($player, 'ball is behind player'));
             $player->getStateMachine()->changeState(ChaseBall::getInstance());
 
             return;
@@ -129,9 +119,7 @@ class KickBall extends State
      */
     private function shoot(PlayerBase $player, Vector2D $ballTarget, $power)
     {
-        if (Define::PLAYER_STATE_INFO_ON) {
-            $this->raise(new ShotEvent($player));
-        }
+        $this->raise(new ShotEvent($player));
 
         //add some noise to the kick. We don't want players who are
         //too accurate! The amount of noise can be adjusted by altering
@@ -166,9 +154,7 @@ class KickBall extends State
 
         $player->getBall()->kick($KickDirection, $power);
 
-        if (Define::PLAYER_STATE_INFO_ON) {
-            $this->raise(new PassEvent($player, $r));
-        }
+        $this->raise(new PassEvent($player, $r));
 
         //let the receiver know a pass is coming
         MessageDispatcher::getInstance()->dispatch($player, $r, new MessageTypes(MessageTypes::Msg_ReceiveBall),

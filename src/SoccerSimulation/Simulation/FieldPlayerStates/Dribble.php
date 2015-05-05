@@ -5,7 +5,6 @@ namespace SoccerSimulation\Simulation\FieldPlayerStates;
 use SoccerSimulation\Common\D2\Transformation;
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\FieldPlayer;
 use SoccerSimulation\Simulation\Prm;
 
@@ -38,9 +37,7 @@ class Dribble extends State
         //let the team know this player is controlling
         $player->getTeam()->setControllingPlayer($player);
 
-        if (Define::PLAYER_STATE_INFO_ON) {
-            $this->raise(new EnterStateEvent($this, $player));
-        }
+        $this->raise(new EnterStateEvent($this, $player));
     }
 
     /**

@@ -5,7 +5,6 @@ namespace SoccerSimulation\Simulation\FieldPlayerStates;
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\FieldPlayer;
 use SoccerSimulation\Simulation\Prm;
 
@@ -59,9 +58,7 @@ class ReceiveBall extends State
         } else {
             $player->getSteering()->activatePursuit();
         }
-        if (Define::PLAYER_STATE_INFO_ON) {
-            $this->raise(new EnterStateEvent($this, $player));
-        }
+        $this->raise(new EnterStateEvent($this, $player));
     }
 
     /**

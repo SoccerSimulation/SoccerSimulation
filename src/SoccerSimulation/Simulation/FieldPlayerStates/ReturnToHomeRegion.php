@@ -5,7 +5,6 @@ namespace SoccerSimulation\Simulation\FieldPlayerStates;
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\Game\Region;
-use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\FieldPlayer;
 
 class ReturnToHomeRegion extends State
@@ -41,9 +40,7 @@ class ReturnToHomeRegion extends State
             $player->getSteering()->setTarget($player->getHomeRegion()->getCenter());
         }
 
-        if (Define::PLAYER_STATE_INFO_ON) {
-            $this->raise(new EnterStateEvent($this, $player));
-        }
+        $this->raise(new EnterStateEvent($this, $player));
     }
 
     /**

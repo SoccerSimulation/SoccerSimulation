@@ -84,8 +84,19 @@ class SoccerPitch implements \JsonSerializable
      */
     private $gameIsActive;
 
+    /**
+     * @var float
+     */
+    private $lastLoopTime;
+
+    /**
+     * @var float
+     */
+    private $serverFps;
+
     public function __construct()
     {
+        $this->lastLoopTime = microtime(true);
         $this->goalKeeperHasBall = false;
         for ($i = 0; $i < self::REGIONS_HORIZONTAL * self::REGIONS_VERTICAL; $i++) {
             $this->regions[] = new Region();
@@ -153,14 +164,17 @@ class SoccerPitch implements \JsonSerializable
         }
     }
 
-    static $tick = 0;
-
     /**
      *  this demo works on a fixed frame rate (60 by default) so we don't need
      *  to pass a time_elapsed as a parameter to the game entities
      */
     public function update()
     {
+        $currentLoopTime = microtime(true);
+        $timePassed = $currentLoopTime - $this->lastLoopTime;
+        $this->serverFps = 1 / $timePassed;
+        $this->lastLoopTime = $currentLoopTime;
+
         // update the balls
         $this->ball->update();
 
@@ -239,6 +253,7 @@ class SoccerPitch implements \JsonSerializable
     public function jsonSerialize()
     {
         return [
+            'serverFps' => $this->serverFps,
             'ball' => $this->ball,
             'teamRed' => $this->redTeam,
             'teamBlue' => $this->blueTeam,

@@ -65,14 +65,6 @@ class Prm
     const MaxShootingForce = 6.0;
     const MaxPassingForce = 3.0;
 
-
-    //the distance away from the center of its home region a player
-    //must be to be considered at home
-    const WithinRangeOfHome = 15.0;
-
-    //how close a player must get to a sweet spot before he can change state
-    const WithinRangeOfSupportSpot = 15.0;
-
     //the minimum distance a receiving player must be from the passing player
     const MinPassDist = 120.0;
     //the minimum distance a player must be from the goalkeeper before it will
@@ -90,16 +82,6 @@ class Prm
     //how close the ball must be to a receiver before he starts chasing it
     const BallWithinReceivingRange = 10.0;
 
-    //these (boolean) values control the amount of player and pitch info shown
-    //1=ON; 0=OFF
-    const ViewStates = 1;
-    const ViewIDs = 1;
-    const ViewSupportSpots = 1;
-    const ViewRegions = 1;
-    const bShowControllingTeam = 1;
-    const ViewTargets = 1;
-    const HighlightIfThreatened = 1;
-
     //simple soccer's physics are calculated using each tick as the unit of time
     //so changing this will adjust the speed
     const FrameRate = 30;
@@ -111,45 +93,10 @@ class Prm
     //how close a neighbour must be to be considered for separation
     const ViewDistance = 30.0;
 
-    static public function BallWithinReceivingRangeSq()
-    {
-        return self::BallWithinReceivingRange * self::BallWithinReceivingRange;
-    }
-
-    static public function KeeperInBallRangeSq()
-    {
-        return self::KeeperInBallRange * self::KeeperInBallRange;
-    }
-
-    static public function PlayerInTargetRangeSq()
-    {
-        return self::PlayerInTargetRange * self::PlayerInTargetRange;
-    }
-
     //player has to be this close to the ball to be able to kick it. The higher
     //the value this gets, the easier it gets to tackle.
     static public function PlayerKickingDistance()
     {
         return 6.0 + self::BallSize;
-    }
-
-    static public function PlayerKickingDistanceSq()
-    {
-        return self::PlayerKickingDistance() * self::PlayerKickingDistance();
-    }
-
-    static public function PlayerComfortZoneSq()
-    {
-        return self::PlayerComfortZone * self::PlayerComfortZone;
-    }
-
-    static public function GoalKeeperInterceptRangeSquared()
-    {
-        return self::GoalKeeperInterceptRange * self::GoalKeeperInterceptRange;
-    }
-
-    static public function WithinRangeOfSupportSpotSq()
-    {
-        return self::WithinRangeOfSupportSpot * self::WithinRangeOfSupportSpot;
     }
 }

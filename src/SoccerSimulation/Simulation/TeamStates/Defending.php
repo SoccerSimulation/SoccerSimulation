@@ -4,7 +4,6 @@ namespace SoccerSimulation\Simulation\TeamStates;
 
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\SoccerTeam;
 
 class Defending extends State
@@ -33,9 +32,7 @@ class Defending extends State
      */
     public function enter($team)
     {
-        if (Define::DEBUG_TEAM_STATES) {
-            $this->raise(new EnterStateEvent($this, $team));
-        }
+        $this->raise(new EnterStateEvent($this, $team));
 
         //these define the home regions for this state of each of the players
         $blueRegions = array(3, 8, 9, 11, 12, 24, 22, 26, 31, 37, 39);

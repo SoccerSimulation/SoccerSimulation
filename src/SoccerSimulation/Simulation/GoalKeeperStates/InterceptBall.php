@@ -4,7 +4,6 @@ namespace SoccerSimulation\Simulation\GoalKeeperStates;
 
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\GoalKeeper;
 
 /**
@@ -40,9 +39,7 @@ class InterceptBall extends State
     {
         $keeper->getSteering()->activatePursuit();
 
-        if (Define::GOALY_STATE_INFO_ON) {
-            $this->raise(new EnterStateEvent($this, $keeper));
-        }
+        $this->raise(new EnterStateEvent($this, $keeper));
     }
 
     /**

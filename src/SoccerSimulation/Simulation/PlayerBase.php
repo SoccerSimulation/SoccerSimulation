@@ -158,7 +158,7 @@ abstract class PlayerBase extends MovingEntity implements Nameable
         foreach ($members as $currentOpponent) {
             //calculate distance to the player. if dist is less than our
             //comfort zone, and the opponent is infront of the player, return true
-            if ($this->isPositionInFrontOfPlayer($currentOpponent->getPosition()) && $this->distanceTo($currentOpponent->getPosition()) < Prm::PlayerComfortZoneSq()) {
+            if ($this->isPositionInFrontOfPlayer($currentOpponent->getPosition()) && $this->distanceTo($currentOpponent->getPosition()) < Prm::PlayerComfortZone) {
                 return true;
             }
 

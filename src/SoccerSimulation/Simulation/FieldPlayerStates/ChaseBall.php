@@ -4,7 +4,6 @@ namespace SoccerSimulation\Simulation\FieldPlayerStates;
 
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\FieldPlayer;
 
 class ChaseBall extends State
@@ -35,9 +34,7 @@ class ChaseBall extends State
     {
         $player->getSteering()->activateSeek();
 
-        if (Define::PLAYER_STATE_INFO_ON) {
-            $this->raise(new EnterStateEvent($this, $player));
-        }
+        $this->raise(new EnterStateEvent($this, $player));
     }
 
     /**

@@ -92,23 +92,19 @@ class GoalKeeper extends PlayerBase implements \JsonSerializable
     }
 
     /**
-     * @return true if the ball comes close enough for the keeper to
-     *         consider intercepting
+     * @return bool
      */
     public function isBallWithinRangeForIntercept()
     {
-        return (Vector2D::vectorDistanceSquared($this->getTeam()->getHomeGoal()->getCenter(),
-                $this->getBall()->getPosition())
-            <= Prm::GoalKeeperInterceptRangeSquared());
+        return $this->getTeam()->getHomeGoal()->getCenter()->distanceTo($this->getBall()->getPosition()) <= Prm::GoalKeeperInterceptRange;
     }
 
     /**
-     * @return true if the keeper has ventured too far away from the goalmouth
+     * @return bool
      */
     public function isTooFarFromGoalMouth()
     {
-        return (Vector2D::vectorDistanceSquared($this->getPosition(), $this->getRearInterposeTarget())
-            > Prm::GoalKeeperInterceptRangeSquared());
+        return $this->distanceTo($this->getRearInterposeTarget()) > Prm::GoalKeeperInterceptRange;
     }
 
     /**

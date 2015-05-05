@@ -5,7 +5,6 @@ namespace SoccerSimulation\Simulation\FieldPlayerStates;
 use SoccerSimulation\Common\D2\Vector2D;
 use SoccerSimulation\Common\FSM\EnterStateEvent;
 use SoccerSimulation\Common\FSM\State;
-use SoccerSimulation\Simulation\Define;
 use SoccerSimulation\Simulation\FieldPlayer;
 
 class Wait extends State
@@ -34,9 +33,7 @@ class Wait extends State
      */
     public function enter($player)
     {
-        if (Define::PLAYER_STATE_INFO_ON) {
-            $this->raise(new EnterStateEvent($this, $player));
-        }
+        $this->raise(new EnterStateEvent($this, $player));
 
         //if the game is not on make sure the target is the center of the player's
         //home region. This is ensure all the players are in the correct positions

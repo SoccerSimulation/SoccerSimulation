@@ -74,10 +74,15 @@ class Region implements \JsonSerializable
     /**
      * returns true if the given position lays inside the region. The
      * region modifier can be used to contract the region bounderies
+     *
+     * @param Vector2D $pos
+     * @param float $regionModifier
+     *
+     * @return bool
      */
-    public function isInside(Vector2D $pos, $r = self::REGION_MODIFIER_NORMAL)
+    public function isInside(Vector2D $pos, $regionModifier = self::REGION_MODIFIER_NORMAL)
     {
-        if ($r == self::REGION_MODIFIER_NORMAL) {
+        if ($regionModifier == self::REGION_MODIFIER_NORMAL) {
             return (($pos->x > $this->left) && ($pos->x < $this->right)
                 && ($pos->y > $this->top) && ($pos->y < $this->bottom));
         } else {

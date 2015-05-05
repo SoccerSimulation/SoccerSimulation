@@ -4,7 +4,6 @@ namespace SoccerSimulation\Simulation;
 
 use SoccerSimulation\Common\D2\Transformation;
 use SoccerSimulation\Common\D2\Vector2D;
-use SoccerSimulation\Common\FSM\State;
 use SoccerSimulation\Common\FSM\StateMachine;
 use SoccerSimulation\Common\Messaging\Telegram;
 use SoccerSimulation\Common\Time\Regulator;
@@ -51,17 +50,24 @@ class FieldPlayer extends PlayerBase implements \JsonSerializable
         $maxSpeedWithoutBall,
         $role
     ) {
-        parent::__construct($homeTeam,
+        parent::__construct(
+            $homeTeam,
             $homeRegion,
             $mass,
             $maxForce,
             $maxSpeedWithBall,
-            $maxSpeedWithoutBall);
+            $maxSpeedWithoutBall
+        );
 
         $this->role = $role;
 
         //set up the state machine
-        $this->stateMachine = new StateMachine($this, Wait::getInstance(), Wait::getInstance(), GlobalPlayerState::getInstance());
+        $this->stateMachine = new StateMachine(
+            $this,
+            Wait::getInstance(),
+            Wait::getInstance(),
+            GlobalPlayerState::getInstance()
+        );
         $this->stateMachine->getCurrentState()->enter($this);
 
         //set up the kick regulator
